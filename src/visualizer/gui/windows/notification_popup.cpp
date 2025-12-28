@@ -16,7 +16,7 @@ namespace lfs::vis::gui {
     namespace {
         // Base dimensions (scaled by DPI factor at runtime)
         constexpr float BASE_BUTTON_WIDTH = 100.0f;
-        constexpr float TEXT_WRAP_WIDTH = 30.0f;  // Multiplier for font size, not pixels
+        constexpr float TEXT_WRAP_WIDTH = 30.0f; // Multiplier for font size, not pixels
         constexpr float POPUP_ALPHA = 0.98f;
         constexpr float BORDER_SIZE = 2.0f;
         constexpr ImVec2 BASE_WINDOW_PADDING = {20.0f, 16.0f};

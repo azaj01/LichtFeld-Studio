@@ -8,12 +8,12 @@
 // clang-format on
 
 #include "gui/gui_manager.hpp"
-#include "gui/dpi_scale.hpp"
 #include "command/command_history.hpp"
 #include "core/image_io.hpp"
 #include "core/logger.hpp"
 #include "core/sogs.hpp"
 #include "core/splat_data_export.hpp"
+#include "gui/dpi_scale.hpp"
 #include "gui/html_viewer_export.hpp"
 #include "gui/localization_manager.hpp"
 #include "gui/panels/main_panel.hpp"
