@@ -350,11 +350,11 @@ namespace lfs::rendering {
             if (auto result = shader->set("viewProj", view_proj); !result) {
                 LOG_ERROR("Failed to set viewProj uniform: {}", result.error());
             }
-            
+
             if (auto result = shader->set("viewPos", view_position); !result) {
                 LOG_ERROR("Failed to set viewPos uniform: {}", result.error());
             }
-            
+
             if (auto result = shader->set("pickingMode", false); !result) {
                 LOG_ERROR("Failed to set pickingMode uniform: {}", result.error());
             }
@@ -366,7 +366,7 @@ namespace lfs::rendering {
                     break;
                 }
             }
-            
+
             if (auto result = shader->set("highlightIndex", visible_highlight_index); !result) {
                 LOG_ERROR("Failed to set highlightIndex uniform: {}", result.error());
             }
@@ -406,11 +406,11 @@ namespace lfs::rendering {
                 glDepthMask(GL_TRUE);
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                
+
                 if (auto result = shader->set("showImages", show_images_ && thumbnail_array_capacity_ > 0); !result) {
                     LOG_ERROR("Failed to set showImages uniform: {}", result.error());
                 }
-                
+
                 if (auto result = shader->set("imageOpacity", image_opacity_); !result) {
                     LOG_ERROR("Failed to set imageOpacity uniform: {}", result.error());
                 }
@@ -430,7 +430,7 @@ namespace lfs::rendering {
                     // Bind texture array
                     if (thumbnail_array_capacity_ > 0) {
                         glActiveTexture(GL_TEXTURE0);
-                        glBindTexture(GL_TEXTURE_2D_ARRAY, thumbnail_array_);                        
+                        glBindTexture(GL_TEXTURE_2D_ARRAY, thumbnail_array_);
                         if (auto result = shader->set("cameraTextures", 0); !result) {
                             LOG_ERROR("Failed to set cameraTextures uniform: {}", result.error());
                         }
@@ -451,7 +451,7 @@ namespace lfs::rendering {
                         BufferBinder<GL_ARRAY_BUFFER> instance_bind(instance_vbo_);
                         upload_buffer(GL_ARRAY_BUFFER, std::span(visible_instances), GL_DYNAMIC_DRAW);
                     }
-                    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);                    
+                    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
                     if (auto result = shader->set("showImages", false); !result) {
                         LOG_ERROR("Failed to set showImages uniform: {}", result.error());
                     }
@@ -529,19 +529,19 @@ namespace lfs::rendering {
 
             const glm::mat4 view_proj = projection * view;
             const glm::vec3 view_pos = glm::vec3(glm::inverse(view)[3]);
-                        
+
             if (auto result = shader->set("viewProj", view_proj); !result) {
                 LOG_ERROR("Failed to set viewProj uniform: {}", result.error());
             }
-            
+
             if (auto result = shader->set("viewPos", view_pos); !result) {
                 LOG_ERROR("Failed to set viewPos uniform: {}", result.error());
             }
-            
+
             if (auto result = shader->set("pickingMode", true); !result) {
                 LOG_ERROR("Failed to set pickingMode uniform: {}", result.error());
             }
-            
+
             if (auto result = shader->set("minimumPickDistance", scale * 2.0f); !result) {
                 LOG_ERROR("Failed to set minimumPickDistance uniform: {}", result.error());
             }

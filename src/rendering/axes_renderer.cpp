@@ -34,7 +34,7 @@ namespace lfs::rendering {
         size_ = size;
         createAxesGeometry();
 
-        if (isInitialized()) {            
+        if (isInitialized()) {
             if (auto result = setupVertexData(); !result) {
                 LOG_ERROR("Failed to setup vertex data for coordinate axes: {}", result.error());
             }
@@ -48,7 +48,7 @@ namespace lfs::rendering {
             createAxesGeometry();
 
             if (isInitialized()) {
-                if(auto result = setupVertexData(); !result) {
+                if (auto result = setupVertexData(); !result) {
                     LOG_ERROR("Failed to setup vertex data for coordinate axes: {}", result.error());
                 }
             }

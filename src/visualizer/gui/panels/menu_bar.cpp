@@ -24,8 +24,8 @@ using namespace lichtfeld::Strings;
 #include <glad/glad.h>
 #include <imgui.h>
 
-#include <cstdlib>
 #include <cfloat>
+#include <cstdlib>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <httplib.h>
