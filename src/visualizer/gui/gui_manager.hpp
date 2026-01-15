@@ -10,6 +10,7 @@
 #include "command/commands/transform_command.hpp"
 #include "core/events.hpp"
 #include "core/parameters.hpp"
+#include "gui/gizmo_transform.hpp"
 #include "gui/panels/gizmo_toolbar.hpp"
 #include "gui/panels/menu_bar.hpp"
 #include "gui/panels/transform_panel.hpp"
@@ -84,6 +85,10 @@ namespace lfs::vis {
             panels::ToolType getCurrentToolMode() const; // Delegates to EditorContext
             const panels::GizmoToolbarState& getGizmoToolbarState() const { return gizmo_toolbar_state_; }
             panels::TransformPanelState& getTransformPanelState() { return transform_panel_state_; }
+
+            // Gizmo manipulation state (for wireframe sync)
+            bool isCropboxGizmoActive() const { return cropbox_gizmo_active_; }
+            bool isEllipsoidGizmoActive() const { return ellipsoid_gizmo_active_; }
 
             bool isForceExit() const { return force_exit_; }
 
@@ -176,6 +181,9 @@ namespace lfs::vis {
             panels::GizmoToolbarState gizmo_toolbar_state_;
             panels::TransformPanelState transform_panel_state_;
 
+            // Unified gizmo context for cropbox/ellipsoid
+            GizmoTransformContext gizmo_context_;
+
             // Cropbox undo/redo state
             bool cropbox_gizmo_active_ = false;
             std::string cropbox_node_name_;
@@ -190,8 +198,13 @@ namespace lfs::vis {
             bool node_gizmo_active_ = false;
             std::vector<std::string> node_gizmo_node_names_;
             std::vector<glm::mat4> node_transforms_before_drag_;
+            std::vector<glm::vec3> node_original_world_positions_;
+            std::vector<glm::mat4> node_parent_world_inverses_;
+            std::vector<glm::mat3> node_original_rotations_;
+            std::vector<glm::vec3> node_original_scales_;
             glm::vec3 gizmo_pivot_{0.0f};
             glm::mat3 gizmo_cumulative_rotation_{1.0f};
+            glm::vec3 gizmo_cumulative_scale_{1.0f};
 
             // Previous tool/selection mode for detecting changes
             panels::ToolType previous_tool_ = panels::ToolType::None;

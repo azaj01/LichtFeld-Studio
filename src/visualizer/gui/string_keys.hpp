@@ -39,7 +39,7 @@ namespace lichtfeld::Strings {
             inline constexpr const char* GETTING_STARTED = "menu.help.getting_started";
             inline constexpr const char* ABOUT = "menu.help.about";
         } // namespace Help
-    } // namespace Menu
+    }     // namespace Menu
 
     namespace Window {
         inline constexpr const char* GETTING_STARTED = "window.getting_started";
@@ -99,7 +99,7 @@ namespace lichtfeld::Strings {
             inline constexpr const char* ENABLED = "about.interop.enabled";
             inline constexpr const char* DISABLED = "about.interop.disabled";
         } // namespace Interop
-    } // namespace About
+    }     // namespace About
 
     namespace Training {
         namespace Section {
@@ -287,7 +287,7 @@ namespace lichtfeld::Strings {
             inline constexpr const char* ADD = "training.button.add";
             inline constexpr const char* REMOVE = "training.button.remove";
         } // namespace Button
-    } // namespace Training
+    }     // namespace Training
 
     namespace Scene {
         inline constexpr const char* ADD_PLY = "scene.add_ply";
@@ -433,6 +433,7 @@ namespace lichtfeld::Strings {
         inline constexpr const char* CAMERA_FRUSTUMS = "main_panel.camera_frustums";
         inline constexpr const char* POINT_CLOUD_MODE = "main_panel.point_cloud_mode";
         inline constexpr const char* DESATURATE_UNSELECTED = "main_panel.desaturate_unselected";
+        inline constexpr const char* DESATURATE_CROPPING = "main_panel.desaturate_cropping";
         inline constexpr const char* FOV = "main_panel.fov";
         inline constexpr const char* SH_DEGREE = "main_panel.sh_degree";
         inline constexpr const char* EQUIRECTANGULAR = "main_panel.equirectangular";
@@ -466,6 +467,8 @@ namespace lichtfeld::Strings {
         inline constexpr const char* RING_SELECTION = "toolbar.ring_selection";
         inline constexpr const char* LOCAL_SPACE = "toolbar.local_space";
         inline constexpr const char* WORLD_SPACE = "toolbar.world_space";
+        inline constexpr const char* ORIGIN_PIVOT = "toolbar.origin_pivot";
+        inline constexpr const char* BOUNDS_CENTER_PIVOT = "toolbar.bounds_center_pivot";
         inline constexpr const char* RESIZE_BOUNDS = "toolbar.resize_bounds";
         inline constexpr const char* MIRROR_X = "toolbar.mirror_x";
         inline constexpr const char* MIRROR_Y = "toolbar.mirror_y";
@@ -566,6 +569,7 @@ namespace lichtfeld::Strings {
         inline constexpr const char* RENDER_SCALE = "tooltip.render_scale";
         inline constexpr const char* POINT_CLOUD_FORCED = "tooltip.point_cloud_forced";
         inline constexpr const char* DESATURATE_UNSELECTED = "tooltip.desaturate_unselected";
+        inline constexpr const char* DESATURATE_CROPPING = "tooltip.desaturate_cropping";
         inline constexpr const char* LOCKED = "tooltip.locked";
         inline constexpr const char* UNLOCKED = "tooltip.unlocked";
         inline constexpr const char* POINT_SIZE = "tooltip.point_size";

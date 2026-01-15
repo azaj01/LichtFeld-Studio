@@ -28,7 +28,7 @@ namespace lfs::vis {
 
     namespace {
         constexpr int GPU_ALIGNMENT = 16; // 16-pixel alignment for GPU texture efficiency
-    } // namespace
+    }                                     // namespace
 
     using namespace lfs::core::events;
 
@@ -730,13 +730,15 @@ namespace lfs::vis {
                     .max = cb.data->max,
                     .transform = glm::inverse(cb.world_transform)};
                 request.crop_inverse = cb.data->inverse;
-                request.crop_desaturate = settings_.show_crop_box && !settings_.use_crop_box;
+                request.crop_desaturate = settings_.show_crop_box && !settings_.use_crop_box && settings_.desaturate_cropping;
+                request.crop_parent_node_index = scene_manager->getScene().getVisibleNodeIndex(cb.parent_splat_id);
             }
         }
 
         // Ellipsoid from scene graph
         if (settings_.use_ellipsoid || settings_.show_ellipsoid) {
-            const auto visible_ellipsoids = scene_manager->getScene().getVisibleEllipsoids();
+            const auto& scene = scene_manager->getScene();
+            const auto visible_ellipsoids = scene.getVisibleEllipsoids();
             const NodeId selected_ellipsoid_id = scene_manager->getSelectedNodeEllipsoidId();
             for (const auto& el : visible_ellipsoids) {
                 if (!el.data)
@@ -747,7 +749,8 @@ namespace lfs::vis {
                     .radii = el.data->radii,
                     .transform = glm::inverse(el.world_transform)};
                 request.ellipsoid_inverse = el.data->inverse;
-                request.ellipsoid_desaturate = settings_.show_ellipsoid && !settings_.use_ellipsoid;
+                request.ellipsoid_desaturate = settings_.show_ellipsoid && !settings_.use_ellipsoid && settings_.desaturate_cropping;
+                request.ellipsoid_parent_node_index = scene.getVisibleNodeIndex(el.parent_splat_id);
                 break;
             }
         }
@@ -1040,7 +1043,7 @@ namespace lfs::vis {
 
                     const bool cache_valid = cached_filtered_point_cloud_ &&
                                              cached_source_point_cloud_ == scene_state.point_cloud &&
-                                             cached_cropbox_transform_ == cb.local_transform &&
+                                             cached_cropbox_transform_ == cb.world_transform &&
                                              cached_cropbox_min_ == cb.data->min &&
                                              cached_cropbox_max_ == cb.data->max &&
                                              cached_cropbox_inverse_ == cb.data->inverse;
@@ -1049,7 +1052,7 @@ namespace lfs::vis {
                         const auto& means = scene_state.point_cloud->means;
                         const auto& colors = scene_state.point_cloud->colors;
                         const size_t num_points = scene_state.point_cloud->size();
-                        const glm::mat4 m = glm::inverse(cb.local_transform);
+                        const glm::mat4 m = glm::inverse(cb.world_transform);
                         const auto device = means.device();
 
                         // GLM column-major -> row-major for tensor matmul
@@ -1082,7 +1085,7 @@ namespace lfs::vis {
                         }
 
                         cached_source_point_cloud_ = scene_state.point_cloud;
-                        cached_cropbox_transform_ = cb.local_transform;
+                        cached_cropbox_transform_ = cb.world_transform;
                         cached_cropbox_min_ = cb.data->min;
                         cached_cropbox_max_ = cb.data->max;
                         cached_cropbox_inverse_ = cb.data->inverse;
@@ -1382,15 +1385,22 @@ namespace lfs::vis {
                 if (!cb.data)
                     continue;
 
+                const bool is_selected = (cb.node_id == selected_cropbox_id);
+
+                // Use pending state for selected cropbox during gizmo manipulation
+                const bool use_pending = is_selected && cropbox_gizmo_active_;
+                const glm::vec3 box_min = use_pending ? pending_cropbox_min_ : cb.data->min;
+                const glm::vec3 box_max = use_pending ? pending_cropbox_max_ : cb.data->max;
+                const glm::mat4 box_transform = use_pending ? pending_cropbox_transform_ : cb.world_transform;
+
                 const lfs::rendering::BoundingBox box{
-                    .min = cb.data->min,
-                    .max = cb.data->max,
-                    .transform = glm::inverse(cb.world_transform)};
+                    .min = box_min,
+                    .max = box_max,
+                    .transform = glm::inverse(box_transform)};
 
                 const glm::vec3 base_color = cb.data->inverse
                                                  ? glm::vec3(1.0f, 0.2f, 0.2f)
                                                  : cb.data->color;
-                const bool is_selected = (cb.node_id == selected_cropbox_id);
                 const float flash = is_selected ? cb.data->flash_intensity : 0.0f;
                 constexpr float FLASH_LINE_BOOST = 4.0f;
                 const glm::vec3 color = glm::mix(base_color, glm::vec3(1.0f), flash);
@@ -1412,14 +1422,23 @@ namespace lfs::vis {
                 if (!el.data)
                     continue;
 
+                const bool is_selected = (el.node_id == selected_ellipsoid_id);
+
+                // Use pending state for selected ellipsoid during gizmo manipulation
+                const glm::vec3 radii = (is_selected && ellipsoid_gizmo_active_)
+                                            ? pending_ellipsoid_radii_
+                                            : el.data->radii;
+                const glm::mat4 transform = (is_selected && ellipsoid_gizmo_active_)
+                                                ? pending_ellipsoid_transform_
+                                                : el.world_transform;
+
                 const lfs::rendering::Ellipsoid ellipsoid{
-                    .radii = el.data->radii,
-                    .transform = el.world_transform};
+                    .radii = radii,
+                    .transform = transform};
 
                 const glm::vec3 base_color = el.data->inverse
                                                  ? glm::vec3(1.0f, 0.2f, 0.2f)
                                                  : el.data->color;
-                const bool is_selected = (el.node_id == selected_ellipsoid_id);
                 const float flash = is_selected ? el.data->flash_intensity : 0.0f;
                 constexpr float FLASH_LINE_BOOST = 4.0f;
                 const glm::vec3 color = glm::mix(base_color, glm::vec3(1.0f), flash);
