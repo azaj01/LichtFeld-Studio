@@ -84,8 +84,11 @@ namespace lfs::vis {
         bool desaturate_unselected = false; // Desaturate unselected PLYs when one is selected
         bool desaturate_cropping = true;    // Desaturate outside crop box/ellipsoid instead of hiding
 
-        // Appearance correction (PPISP) - off by default for fast viewport
+        // Appearance correction (PPISP)
         bool apply_appearance_correction = false;
+        enum class PPISPMode { MANUAL = 0,
+                               AUTO = 1 };
+        PPISPMode ppisp_mode = PPISPMode::AUTO;
         PPISPOverrides ppisp_overrides;
 
         // Background

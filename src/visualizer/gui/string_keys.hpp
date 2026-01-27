@@ -439,6 +439,9 @@ namespace lichtfeld::Strings {
         inline constexpr const char* GUT_MODE = "main_panel.gut_mode";
         inline constexpr const char* MIP_FILTER = "main_panel.mip_filter";
         inline constexpr const char* APPEARANCE_CORRECTION = "main_panel.appearance_correction";
+        inline constexpr const char* PPISP_MODE = "main_panel.ppisp_mode";
+        inline constexpr const char* PPISP_MODE_MANUAL = "main_panel.ppisp_mode_manual";
+        inline constexpr const char* PPISP_MODE_AUTO = "main_panel.ppisp_mode_auto";
         inline constexpr const char* PPISP_EXPOSURE = "main_panel.ppisp_exposure";
         inline constexpr const char* PPISP_VIGNETTE = "main_panel.ppisp_vignette";
         inline constexpr const char* PPISP_COLOR_BALANCE = "main_panel.ppisp_color_balance";
@@ -577,6 +580,7 @@ namespace lichtfeld::Strings {
         inline constexpr const char* GUT_MODE = "tooltip.gut_mode";
         inline constexpr const char* MIP_FILTER = "tooltip.mip_filter";
         inline constexpr const char* APPEARANCE_CORRECTION = "tooltip.appearance_correction";
+        inline constexpr const char* PPISP_MODE = "tooltip.ppisp_mode";
         inline constexpr const char* PPISP_EXPOSURE = "tooltip.ppisp_exposure";
         inline constexpr const char* PPISP_GAMMA = "tooltip.ppisp_gamma";
         inline constexpr const char* PPISP_COLOR_RGB = "tooltip.ppisp_color_rgb";

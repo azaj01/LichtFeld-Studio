@@ -420,6 +420,23 @@ namespace lfs::vis::gui::panels {
             ImGui::Indent();
             auto& ov = settings.ppisp_overrides;
 
+            const char* mode_items[] = {LOC(MainPanel::PPISP_MODE_MANUAL), LOC(MainPanel::PPISP_MODE_AUTO)};
+            int mode_idx = static_cast<int>(settings.ppisp_mode);
+            ImGui::SetNextItemWidth(150.0f * getDpiScale());
+            if (ImGui::Combo(LOC(MainPanel::PPISP_MODE), &mode_idx, mode_items, 2)) {
+                settings.ppisp_mode = static_cast<RenderSettings::PPISPMode>(mode_idx);
+                settings_changed = true;
+                render_manager->updateSettings(settings);
+            }
+            if (ImGui::IsItemHovered()) {
+                widgets::SetThemedTooltip("%s", LOC(Tooltip::PPISP_MODE));
+            }
+
+            const bool is_auto = (settings.ppisp_mode == RenderSettings::PPISPMode::AUTO);
+            if (is_auto) {
+                ImGui::BeginDisabled();
+            }
+
             // Exposure
             if (widgets::SliderWithReset(LOC(MainPanel::PPISP_EXPOSURE), &ov.exposure_offset, -3.0f, 3.0f, 0.0f,
                                          LOC(Tooltip::PPISP_EXPOSURE))) {
@@ -497,10 +514,14 @@ namespace lfs::vis::gui::panels {
                 ImGui::TreePop();
             }
 
+            if (is_auto) {
+                ImGui::EndDisabled();
+            }
+
             ImGui::Unindent();
         }
 
-        // Render Scale (VRAM optimization)
+        // Render Scale
         ImGui::Separator();
         if (widgets::SliderWithReset(LOC(MainPanel::RENDER_SCALE), &settings.render_scale, 0.25f, 1.0f, 1.0f,
                                      LOC(Tooltip::RENDER_SCALE))) {

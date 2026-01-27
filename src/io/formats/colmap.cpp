@@ -841,7 +841,8 @@ namespace lfs::io {
                 mask_path,
                 cam_data.width,
                 cam_data.height,
-                static_cast<int>(i));
+                static_cast<int>(i),
+                static_cast<int>(img.camera_id));
 
             cameras.push_back(std::move(camera));
         }

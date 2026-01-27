@@ -881,13 +881,15 @@ namespace lfs::vis {
             // Try trainer's PPISP first (has per-frame params and knows training cameras)
             if (const auto* tm = scene_manager ? scene_manager->getTrainerManager() : nullptr) {
                 if (const auto* trainer = tm->getTrainer(); trainer && trainer->hasPPISP()) {
-                    lfs::training::PPISPViewportOverrides trainer_overrides{
-                        .exposure_offset = settings_.ppisp_overrides.exposure_offset,
-                        .vignette_enabled = settings_.ppisp_overrides.vignette_enabled,
-                        .vignette_strength = settings_.ppisp_overrides.vignette_strength,
-                        .wb_temperature = settings_.ppisp_overrides.wb_temperature,
-                        .wb_tint = settings_.ppisp_overrides.wb_tint,
-                        .gamma_multiplier = settings_.ppisp_overrides.gamma_multiplier};
+                    lfs::training::PPISPViewportOverrides trainer_overrides{};
+                    if (settings_.ppisp_mode == RenderSettings::PPISPMode::MANUAL) {
+                        trainer_overrides.exposure_offset = settings_.ppisp_overrides.exposure_offset;
+                        trainer_overrides.vignette_enabled = settings_.ppisp_overrides.vignette_enabled;
+                        trainer_overrides.vignette_strength = settings_.ppisp_overrides.vignette_strength;
+                        trainer_overrides.wb_temperature = settings_.ppisp_overrides.wb_temperature;
+                        trainer_overrides.wb_tint = settings_.ppisp_overrides.wb_tint;
+                        trainer_overrides.gamma_multiplier = settings_.ppisp_overrides.gamma_multiplier;
+                    }
                     auto corrected = trainer->applyPPISPForViewport(
                         *render_result->image, current_camera_id_, trainer_overrides);
                     render_result->image = std::make_shared<lfs::core::Tensor>(std::move(corrected));
@@ -895,12 +897,14 @@ namespace lfs::vis {
                 }
             }
 
-            // Fall back to scene's standalone appearance model
             if (!applied && scene_manager) {
                 auto& scene = scene_manager->getScene();
                 if (scene.hasAppearanceModel()) {
+                    const auto& overrides = (settings_.ppisp_mode == RenderSettings::PPISPMode::MANUAL)
+                                                ? settings_.ppisp_overrides
+                                                : PPISPOverrides{};
                     auto corrected = applyStandaloneAppearance(
-                        *render_result->image, scene, current_camera_id_, settings_.ppisp_overrides);
+                        *render_result->image, scene, current_camera_id_, overrides);
                     if (corrected.is_valid()) {
                         render_result->image = std::make_shared<lfs::core::Tensor>(std::move(corrected));
                     }
