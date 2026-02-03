@@ -11,11 +11,11 @@
 #include "io/filesystem_utils.hpp"
 #include "training/dataset.hpp"
 #include <algorithm>
-#include <stb_image.h>
 #include <cctype>
 #include <chrono>
 #include <filesystem>
 #include <format>
+#include <stb_image.h>
 #include <system_error>
 
 namespace lfs::io {

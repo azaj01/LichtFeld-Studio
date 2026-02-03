@@ -33,9 +33,9 @@ namespace {
     }
 
     static inline unsigned char* downscale_resample_nch(const unsigned char* src,
-                                                          int w, int h, int nw, int nh,
-                                                          int channels,
-                                                          int nthreads /* 0=auto, 1=single */) {
+                                                        int w, int h, int nw, int nh,
+                                                        int channels,
+                                                        int nthreads /* 0=auto, 1=single */) {
         size_t outbytes = (size_t)nw * nh * channels;
         auto* out = static_cast<unsigned char*>(std::malloc(outbytes));
         if (!out)

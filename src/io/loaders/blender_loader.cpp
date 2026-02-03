@@ -11,11 +11,11 @@
 #include "io/error.hpp"
 #include "training/dataset.hpp"
 #include <chrono>
-#include <stb_image.h>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <stb_image.h>
 
 namespace lfs::io {
 

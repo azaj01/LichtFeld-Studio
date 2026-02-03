@@ -502,10 +502,10 @@ namespace lfs::training {
 
     /// Configuration for mask loading in PipelinedDataLoader
     struct PipelinedMaskConfig {
-        bool load_masks = false;          // Whether to load masks alongside images
-        bool invert_masks = false;        // Invert mask values (1.0 - mask)
-        float mask_threshold = 0.0f;      // If > 0, values >= threshold become 1.0
-        bool use_alpha_as_mask = false;   // Extract alpha channel from RGBA as mask
+        bool load_masks = false;        // Whether to load masks alongside images
+        bool invert_masks = false;      // Invert mask values (1.0 - mask)
+        float mask_threshold = 0.0f;    // If > 0, values >= threshold become 1.0
+        bool use_alpha_as_mask = false; // Extract alpha channel from RGBA as mask
     };
 
     // Pipelined DataLoader with GPU batch JPEG decoding

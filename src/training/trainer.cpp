@@ -1182,7 +1182,7 @@ namespace lfs::training {
                 lfs::core::Tensor tile_grad_alpha; // Gradient for alpha (from mask penalty)
 
                 const bool use_mask = params_.optimization.mask_mode != lfs::core::param::MaskMode::None &&
-                                    (cam->has_mask() || (params_.optimization.use_alpha_as_mask && scene_ && scene_->imagesHaveAlpha()));
+                                      (cam->has_mask() || (params_.optimization.use_alpha_as_mask && scene_ && scene_->imagesHaveAlpha()));
                 if (use_mask) {
                     // Use pipelined mask if available, otherwise load from camera (fallback for validation, etc.)
                     lfs::core::Tensor mask;
