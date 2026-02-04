@@ -20,7 +20,6 @@ class SaveDirectoryPopup:
     """Popup for configuring dataset import paths."""
 
     POPUP_WIDTH = 560
-    POPUP_HEIGHT = 360
     INPUT_WIDTH = 380
     BUTTON_WIDTH = 100
     BUTTON_SPACING = 8
@@ -31,7 +30,6 @@ class SaveDirectoryPopup:
         self._dataset_info = None
         self._output_path = ""
         self._init_path = ""
-        self._use_custom_init = False
         self._on_confirm: Optional[Callable[[DatasetLoadParams], None]] = None
 
     @property
@@ -45,7 +43,6 @@ class SaveDirectoryPopup:
         self._dataset_info = lf.detect_dataset_info(dataset_path)
         self._output_path = str(Path(self._dataset_info.base_path) / "output")
         self._init_path = ""
-        self._use_custom_init = False
         self._on_confirm = on_confirm
         self._pending_open = True
 
@@ -54,15 +51,19 @@ class SaveDirectoryPopup:
         import lichtfeld as lf
         tr = lf.ui.tr
 
+        if not self._pending_open and not self._open:
+            return
+
+        scale = layout.get_dpi_scale()
+
         if self._pending_open:
             layout.set_next_window_pos_center()
-            layout.set_next_window_size((self.POPUP_WIDTH, self.POPUP_HEIGHT))
+            layout.set_next_window_size((self.POPUP_WIDTH * scale, 0))
             layout.open_popup(tr("load_dataset_popup.title"))
             self._pending_open = False
             self._open = True
 
-        if not self._open:
-            return
+        layout.push_modal_style()
 
         if layout.begin_popup_modal(tr("load_dataset_popup.title")):
             info = self._dataset_info
@@ -97,25 +98,12 @@ class SaveDirectoryPopup:
                 layout.text_colored(f"({info.mask_count} masks)", (0.6, 0.6, 0.6, 1.0))
 
             layout.spacing()
-
-            # Custom init file option
-            _, self._use_custom_init = layout.checkbox("Custom init file (replaces points3D)", self._use_custom_init)
-            if self._use_custom_init:
-                layout.set_next_item_width(self.INPUT_WIDTH)
-                _, self._init_path = layout.input_text("##init_path", self._init_path)
-                layout.same_line()
-                if layout.button(tr("common.browse") + "##init"):
-                    path = lf.ui.open_ply_file_dialog(str(info.base_path))
-                    if path:
-                        self._init_path = path
-
-            layout.spacing()
             layout.separator()
             layout.spacing()
 
             # Output path
             layout.text_colored(tr("load_dataset_popup.output_dir"), (0.6, 0.6, 0.6, 1.0))
-            layout.set_next_item_width(self.INPUT_WIDTH)
+            layout.set_next_item_width(self.INPUT_WIDTH * scale)
             _, self._output_path = layout.input_text("##output_path", self._output_path)
             layout.same_line()
             if layout.button(tr("common.browse") + "##output"):
@@ -124,32 +112,47 @@ class SaveDirectoryPopup:
                     self._output_path = path
 
             layout.spacing()
+
+            layout.text_colored(tr("load_dataset_popup.init_file"), (0.6, 0.6, 0.6, 1.0))
+            layout.set_next_item_width(self.INPUT_WIDTH * scale)
+            _, self._init_path = layout.input_text("##init_path", self._init_path)
+            layout.same_line()
+            if layout.button(tr("common.browse") + "##init"):
+                path = lf.ui.open_ply_file_dialog(str(info.base_path))
+                if path:
+                    self._init_path = path
+
+            layout.spacing()
             layout.text_wrapped(tr("load_dataset_popup.help_text"))
             layout.spacing()
             layout.separator()
             layout.spacing()
 
             avail_width = layout.get_content_region_avail()[0]
-            total_width = self.BUTTON_WIDTH * 2 + self.BUTTON_SPACING
+            btn_width = self.BUTTON_WIDTH * scale
+            btn_spacing = self.BUTTON_SPACING * scale
+            total_width = btn_width * 2 + btn_spacing
             layout.set_cursor_pos_x(layout.get_cursor_pos()[0] + avail_width - total_width)
 
-            if layout.button_styled(tr("common.cancel"), "secondary", (self.BUTTON_WIDTH, 0)) or lf.ui.is_key_pressed(lf.ui.Key.ESCAPE):
+            if layout.button_styled(tr("common.cancel"), "secondary", (btn_width, 0)) or lf.ui.is_key_pressed(lf.ui.Key.ESCAPE):
                 self._open = False
                 layout.close_current_popup()
 
-            layout.same_line()
+            layout.same_line(0, btn_spacing)
 
-            if layout.button_styled(tr("common.load"), "success", (self.BUTTON_WIDTH, 0)) or lf.ui.is_key_pressed(lf.ui.Key.ENTER):
+            if layout.button_styled(tr("common.load"), "success", (btn_width, 0)) or lf.ui.is_key_pressed(lf.ui.Key.ENTER):
                 self._open = False
                 layout.close_current_popup()
                 if self._on_confirm:
                     params = DatasetLoadParams(
                         dataset_path=Path(info.base_path),
                         output_path=Path(self._output_path),
-                        init_path=Path(self._init_path) if self._use_custom_init and self._init_path else None,
+                        init_path=Path(self._init_path) if self._init_path else None,
                     )
                     self._on_confirm(params)
 
             layout.end_popup_modal()
         else:
             self._open = False
+
+        layout.pop_modal_style()

@@ -567,6 +567,7 @@
     "sparse_dir": "Sparse: ",
     "masks_dir": "マスク: ",
     "output_dir": "出力:   ",
+    "init_file": "Init file（任意、points3Dを置換）:",
     "help_text": "チェックポイント、ログ、エクスポートされたモデルは出力ディレクトリに保存されます。"
   },
 

@@ -9,7 +9,6 @@ class ExitConfirmationPopup:
     """Popup dialog for confirming application exit."""
 
     POPUP_WIDTH = 340
-    POPUP_HEIGHT = 150
     BUTTON_WIDTH = 100
     BUTTON_SPACING = 12
 
@@ -41,15 +40,17 @@ class ExitConfirmationPopup:
         import lichtfeld as lf
         tr = lf.ui.tr
 
+        if not self._pending_open and not self._open:
+            return
+
+        scale = layout.get_dpi_scale()
+
         if self._pending_open:
             layout.set_next_window_pos_viewport_center()
-            layout.set_next_window_size((self.POPUP_WIDTH, self.POPUP_HEIGHT))
+            layout.set_next_window_size((self.POPUP_WIDTH * scale, 0))
             layout.open_popup(tr("exit_popup.title"))
             self._pending_open = False
             self._open = True
-
-        if not self._open:
-            return
 
         layout.set_next_window_focus()
         layout.push_modal_style()
@@ -62,17 +63,19 @@ class ExitConfirmationPopup:
             layout.spacing()
 
             avail_width = layout.get_content_region_avail()[0]
-            total_width = self.BUTTON_WIDTH * 2 + self.BUTTON_SPACING
+            btn_width = self.BUTTON_WIDTH * scale
+            btn_spacing = self.BUTTON_SPACING * scale
+            total_width = btn_width * 2 + btn_spacing
             layout.set_cursor_pos_x(layout.get_cursor_pos()[0] + (avail_width - total_width) / 2)
 
-            if layout.button_styled(tr("common.cancel"), "secondary", (self.BUTTON_WIDTH, 0)):
+            if layout.button_styled(tr("common.cancel"), "secondary", (btn_width, 0)):
                 self._close(layout)
                 if self._on_cancel:
                     self._on_cancel()
 
-            layout.same_line(0, self.BUTTON_SPACING)
+            layout.same_line(0, btn_spacing)
 
-            if layout.button_styled(tr("exit_popup.exit"), "error", (self.BUTTON_WIDTH, 0)):
+            if layout.button_styled(tr("exit_popup.exit"), "error", (btn_width, 0)):
                 self._close(layout)
                 if self._on_confirm:
                     self._on_confirm()

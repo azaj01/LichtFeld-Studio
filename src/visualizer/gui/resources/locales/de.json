@@ -567,6 +567,7 @@
     "sparse_dir": "Sparse:  ",
     "masks_dir": "Masken:  ",
     "output_dir": "Ausgabe: ",
+    "init_file": "Init-Datei (optional, ersetzt points3D):",
     "help_text": "Trainings-Checkpoints, Logs und exportierte Modelle werden im Ausgabeverzeichnis gespeichert."
   },
 

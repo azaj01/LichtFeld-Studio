@@ -567,6 +567,7 @@
     "sparse_dir": "Sparse：",
     "masks_dir": "掩码：  ",
     "output_dir": "输出：  ",
+    "init_file": "Init file（可选，替换 points3D）：",
     "help_text": "检查点、日志和导出的模型将保存到输出目录。"
   },
 

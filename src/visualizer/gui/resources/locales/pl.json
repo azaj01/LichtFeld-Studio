@@ -567,6 +567,7 @@
     "sparse_dir": "Sparse:  ",
     "masks_dir": "Maski:   ",
     "output_dir": "Wyjście: ",
+    "init_file": "Init file (opcjonalnie, zastępuje points3D):",
     "help_text": "Punkty kontrolne, logi i wyeksportowane modele zostaną zapisane w katalogu wyjściowym."
   },
 

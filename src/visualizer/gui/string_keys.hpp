@@ -631,6 +631,7 @@ namespace lichtfeld::Strings {
         inline constexpr const char* SPARSE_DIR = "load_dataset_popup.sparse_dir";
         inline constexpr const char* MASKS_DIR = "load_dataset_popup.masks_dir";
         inline constexpr const char* OUTPUT_DIR = "load_dataset_popup.output_dir";
+        inline constexpr const char* INIT_FILE = "load_dataset_popup.init_file";
         inline constexpr const char* HELP_TEXT = "load_dataset_popup.help_text";
     } // namespace LoadDatasetPopup
 

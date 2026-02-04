@@ -567,6 +567,7 @@
     "sparse_dir": "Sparse: ",
     "masks_dir": "마스크: ",
     "output_dir": "출력:   ",
+    "init_file": "Init file (선택 사항, points3D 대체):",
     "help_text": "체크포인트, 로그 및 내보낸 모델이 출력 디렉터리에 저장됩니다."
   },
 

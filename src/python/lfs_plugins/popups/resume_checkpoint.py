@@ -20,7 +20,6 @@ class ResumeCheckpointPopup:
     """Popup for configuring checkpoint resume."""
 
     POPUP_WIDTH = 580
-    POPUP_HEIGHT = 340
     INPUT_WIDTH = 400
     BUTTON_WIDTH = 100
     BUTTON_SPACING = 8
@@ -78,15 +77,19 @@ class ResumeCheckpointPopup:
         import lichtfeld as lf
         tr = lf.ui.tr
 
+        if not self._pending_open and not self._open:
+            return
+
+        scale = layout.get_dpi_scale()
+
         if self._pending_open:
             layout.set_next_window_pos_center()
-            layout.set_next_window_size((self.POPUP_WIDTH, self.POPUP_HEIGHT))
+            layout.set_next_window_size((self.POPUP_WIDTH * scale, 0))
             layout.open_popup(tr("resume_checkpoint_popup.title"))
             self._pending_open = False
             self._open = True
 
-        if not self._open:
-            return
+        layout.push_modal_style()
 
         if layout.begin_popup_modal(tr("resume_checkpoint_popup.title")):
             header = self._header
@@ -130,7 +133,7 @@ class ResumeCheckpointPopup:
 
             # Dataset path (editable)
             layout.text_colored(tr("resume_checkpoint_popup.dataset_path"), (0.6, 0.6, 0.6, 1.0))
-            layout.set_next_item_width(self.INPUT_WIDTH)
+            layout.set_next_item_width(self.INPUT_WIDTH * scale)
             changed, self._dataset_path = layout.input_text("##dataset_path", self._dataset_path)
             if changed:
                 self._dataset_valid = self._validate_dataset(self._dataset_path)
@@ -152,7 +155,7 @@ class ResumeCheckpointPopup:
 
             # Output path
             layout.text_colored(tr("resume_checkpoint_popup.output_path"), (0.6, 0.6, 0.6, 1.0))
-            layout.set_next_item_width(self.INPUT_WIDTH)
+            layout.set_next_item_width(self.INPUT_WIDTH * scale)
             _, self._output_path = layout.input_text("##output_path", self._output_path)
             layout.same_line()
             if layout.button(tr("common.browse") + "##output"):
@@ -167,19 +170,21 @@ class ResumeCheckpointPopup:
             layout.spacing()
 
             avail_width = layout.get_content_region_avail()[0]
-            total_width = self.BUTTON_WIDTH * 2 + self.BUTTON_SPACING
+            btn_width = self.BUTTON_WIDTH * scale
+            btn_spacing = self.BUTTON_SPACING * scale
+            total_width = btn_width * 2 + btn_spacing
             layout.set_cursor_pos_x(layout.get_cursor_pos()[0] + avail_width - total_width)
 
-            if layout.button_styled(tr("common.cancel"), "secondary", (self.BUTTON_WIDTH, 0)) or lf.ui.is_key_pressed(lf.ui.Key.ESCAPE):
+            if layout.button_styled(tr("common.cancel"), "secondary", (btn_width, 0)) or lf.ui.is_key_pressed(lf.ui.Key.ESCAPE):
                 self._open = False
                 layout.close_current_popup()
 
-            layout.same_line()
+            layout.same_line(0, btn_spacing)
 
             if not self._dataset_valid:
                 layout.begin_disabled()
 
-            if layout.button_styled(tr("common.load"), "success", (self.BUTTON_WIDTH, 0)) or (
+            if layout.button_styled(tr("common.load"), "success", (btn_width, 0)) or (
                 self._dataset_valid and lf.ui.is_key_pressed(lf.ui.Key.ENTER)
             ):
                 self._open = False
@@ -198,3 +203,5 @@ class ResumeCheckpointPopup:
             layout.end_popup_modal()
         else:
             self._open = False
+
+        layout.pop_modal_style()

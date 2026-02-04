@@ -567,6 +567,7 @@
     "sparse_dir": "Sparse:      ",
     "masks_dir": "Maskers:     ",
     "output_dir": "Output:      ",
+    "init_file": "Init file (optioneel, vervangt points3D):",
     "help_text": "Checkpoints, logs en geëxporteerde modellen worden opgeslagen in de output map."
   },
 

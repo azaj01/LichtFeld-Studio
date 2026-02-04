@@ -567,6 +567,7 @@
     "sparse_dir": "Sparse:  ",
     "masks_dir": "Maschere:",
     "output_dir": "Output:  ",
+    "init_file": "Init file (opzionale, sostituisce points3D):",
     "help_text": "I checkpoint, i log e i modelli esportati saranno salvati nella cartella di output."
   },
 
