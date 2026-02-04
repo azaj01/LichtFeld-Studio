@@ -307,7 +307,7 @@ namespace lfs::python {
         void end_popup_modal();
         void close_current_popup();
         void set_next_window_pos_center();
-        void set_next_window_pos_viewport_center();
+        void set_next_window_pos_viewport_center(bool always = false);
         void set_next_window_focus();
         void push_modal_style();
         void pop_modal_style();

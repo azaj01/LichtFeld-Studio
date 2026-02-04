@@ -56,19 +56,20 @@ class SaveDirectoryPopup:
 
         scale = layout.get_dpi_scale()
 
+        popup_title = tr("load_dataset_popup.title")
+
         if self._pending_open:
-            layout.set_next_window_pos_center()
             layout.set_next_window_size((self.POPUP_WIDTH * scale, 0))
-            layout.open_popup(tr("load_dataset_popup.title"))
+            layout.open_popup(popup_title)
             self._pending_open = False
             self._open = True
 
+        layout.set_next_window_pos_viewport_center(always=True)
         layout.push_modal_style()
 
-        if layout.begin_popup_modal(tr("load_dataset_popup.title")):
+        if layout.begin_popup_modal(popup_title):
             info = self._dataset_info
 
-            # Header
             layout.text_colored("Dataset", (0.3, 0.7, 1.0, 1.0))
             layout.same_line()
             layout.text_colored("|", (0.5, 0.5, 0.5, 1.0))
@@ -79,7 +80,6 @@ class SaveDirectoryPopup:
             layout.separator()
             layout.spacing()
 
-            # Dataset info
             layout.text_colored(tr("load_dataset_popup.images_dir"), (0.6, 0.6, 0.6, 1.0))
             layout.same_line()
             layout.label(str(info.images_path))
@@ -101,7 +101,6 @@ class SaveDirectoryPopup:
             layout.separator()
             layout.spacing()
 
-            # Output path
             layout.text_colored(tr("load_dataset_popup.output_dir"), (0.6, 0.6, 0.6, 1.0))
             layout.set_next_item_width(self.INPUT_WIDTH * scale)
             _, self._output_path = layout.input_text("##output_path", self._output_path)
@@ -152,7 +151,7 @@ class SaveDirectoryPopup:
                     self._on_confirm(params)
 
             layout.end_popup_modal()
-        else:
-            self._open = False
+        elif self._open:
+            layout.open_popup(popup_title)
 
         layout.pop_modal_style()

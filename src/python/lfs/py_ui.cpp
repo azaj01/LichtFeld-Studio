@@ -1662,11 +1662,11 @@ namespace lfs::python {
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
     }
 
-    void PyUILayout::set_next_window_pos_viewport_center() {
-        auto [vp_x, vp_y] = get_viewport_pos();
-        auto [vp_w, vp_h] = get_viewport_size();
+    void PyUILayout::set_next_window_pos_viewport_center(const bool always) {
+        const auto [vp_x, vp_y] = get_viewport_pos();
+        const auto [vp_w, vp_h] = get_viewport_size();
         const ImVec2 center{vp_x + vp_w * 0.5f, vp_y + vp_h * 0.5f};
-        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, {0.5f, 0.5f});
+        ImGui::SetNextWindowPos(center, always ? ImGuiCond_Always : ImGuiCond_Appearing, {0.5f, 0.5f});
     }
 
     void PyUILayout::set_next_window_focus() {
@@ -2443,7 +2443,7 @@ namespace lfs::python {
             .def("end_popup_modal", &PyUILayout::end_popup_modal, "End the current modal popup")
             .def("close_current_popup", &PyUILayout::close_current_popup, "Close the currently open popup")
             .def("set_next_window_pos_center", &PyUILayout::set_next_window_pos_center, "Center the next window on the main viewport")
-            .def("set_next_window_pos_viewport_center", &PyUILayout::set_next_window_pos_viewport_center, "Center the next window on the 3D viewport")
+            .def("set_next_window_pos_viewport_center", &PyUILayout::set_next_window_pos_viewport_center, nb::arg("always") = false, "Center the next window on the 3D viewport")
             .def("set_next_window_focus", &PyUILayout::set_next_window_focus, "Set focus to the next window")
             .def("push_modal_style", &PyUILayout::push_modal_style, "Push modal dialog style onto the style stack")
             .def("pop_modal_style", &PyUILayout::pop_modal_style, "Pop modal dialog style from the style stack")

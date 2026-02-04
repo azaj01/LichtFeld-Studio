@@ -742,7 +742,7 @@ class UILayout:
     def set_next_window_pos_center(self) -> None:
         """Center the next window on the main viewport"""
 
-    def set_next_window_pos_viewport_center(self) -> None:
+    def set_next_window_pos_viewport_center(self, always: bool = False) -> None:
         """Center the next window on the 3D viewport"""
 
     def set_next_window_focus(self) -> None:

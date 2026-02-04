@@ -737,9 +737,7 @@ namespace lfs::io {
                 focal_x = focal_y = params[0];
                 center_x = params[1];
                 center_y = params[2];
-                // k1 should be zero for COLMAP's SIMPLE_RADIAL to match a pinhole model
                 if (params[3] != 0.0f) {
-                    LOG_WARN("Camera uses SIMPLE_RADIAL model with non-zero k1 distortion ({})", params[3]);
                     radial_dist = Tensor::from_vector({params[3]}, {1}, Device::CPU);
                 } else {
                     radial_dist = Tensor::empty({0}, Device::CPU);
