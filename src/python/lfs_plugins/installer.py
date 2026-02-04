@@ -64,6 +64,23 @@ class PluginInstaller:
 
         return True
 
+    DEPS_STAMP = ".deps_installed"
+
+    def _deps_stamp_path(self) -> Path:
+        assert self.plugin.venv_path is not None
+        return self.plugin.venv_path / self.DEPS_STAMP
+
+    def _deps_already_installed(self) -> bool:
+        stamp = self._deps_stamp_path()
+        if not stamp.exists():
+            return False
+        stamp_mtime = stamp.stat().st_mtime
+        for name in ("plugin.toml", "uv.lock"):
+            src = self.plugin.info.path / name
+            if src.exists() and src.stat().st_mtime > stamp_mtime:
+                return False
+        return True
+
     def install_dependencies(
         self, on_progress: Optional[Callable[[str], None]] = None
     ) -> bool:
@@ -72,6 +89,9 @@ class PluginInstaller:
         plugin_path = self.plugin.info.path
         use_sync = (plugin_path / "uv.lock").exists()
         if not deps and not use_sync:
+            return True
+
+        if self._deps_already_installed():
             return True
 
         uv = self._find_uv()
@@ -108,27 +128,27 @@ class PluginInstaller:
         if on_progress:
             on_progress(action)
 
-        proc = subprocess.Popen(
+        output_lines = []
+        with subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-        )
+        ) as proc:
+            if proc.stdout is not None:
+                for line in iter(proc.stdout.readline, ""):
+                    line = line.rstrip()
+                    if line and on_progress:
+                        on_progress(line)
+                    output_lines.append(line)
+            proc.wait()
 
-        output_lines = []
-        if proc.stdout is not None:
-            for line in iter(proc.stdout.readline, ""):
-                line = line.rstrip()
-                if line and on_progress:
-                    on_progress(line)
-                output_lines.append(line)
-
-        proc.wait()
         if proc.returncode != 0:
             tail = "\n".join(output_lines[-10:])
             raise PluginDependencyError(f"{error_label} failed:\n{tail}")
 
+        self._deps_stamp_path().touch()
         return True
 
     def _find_uv(self) -> Optional[Path]:

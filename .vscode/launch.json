@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach Python (debugpy)",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/src/python/lfs_plugins",
+                    "remoteRoot": "${workspaceFolder}/debug_build/src/python/lfs_plugins"
+                }
+            ],
+            "justMyCode": false
+        }
+    ]
+}

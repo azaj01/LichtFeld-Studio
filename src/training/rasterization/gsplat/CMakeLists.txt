@@ -36,22 +36,14 @@ set(GSPLAT_SOURCES
 # lfs suffix avoids conflict with legacy gsplat_backend
 add_library(gsplat_backend_lfs STATIC ${GSPLAT_SOURCES})
 
-# PTX-only builds require separable compilation OFF
-if(LFS_DEFER_DEVICE_SYMBOLS)
-    set(_sep_comp OFF)
-else()
-    set(_sep_comp ON)
-endif()
-
 set_target_properties(gsplat_backend_lfs PROPERTIES
         CXX_STANDARD 23
         CXX_STANDARD_REQUIRED ON
         CUDA_STANDARD 20
         CUDA_STANDARD_REQUIRED ON
         CUDA_ARCHITECTURES "${LichtFeld-Studio_CUDA_ARCH}"
-        CUDA_SEPARABLE_COMPILATION ${_sep_comp}
+        CUDA_SEPARABLE_COMPILATION OFF
         POSITION_INDEPENDENT_CODE ON
-        CUDA_RESOLVE_DEVICE_SYMBOLS ON
 )
 
 target_include_directories(gsplat_backend_lfs

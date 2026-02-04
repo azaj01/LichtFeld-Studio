@@ -8,6 +8,19 @@ message(STATUS "Configuring Python components (runner + nanobind module)")
 find_package(Python REQUIRED COMPONENTS Interpreter Development Development.Module Development.SABIModule)
 find_package(nanobind CONFIG REQUIRED)
 
+# vcpkg extension modules use release ABI; debug libpython has Py_DEBUG which
+# changes _PyRuntimeState layout, causing ABI mismatch crashes.
+get_target_property(_py_debug_lib Python::Python IMPORTED_LOCATION_DEBUG)
+if(_py_debug_lib AND _py_debug_lib MATCHES "python3\\.([0-9]+)d\\.a$")
+    string(REGEX REPLACE "debug/lib/libpython3\\.([0-9]+)d\\.a$"
+                         "lib/libpython3.\\1.a" _py_release_lib "${_py_debug_lib}")
+    if(EXISTS "${_py_release_lib}")
+        set_target_properties(Python::Python PROPERTIES
+            IMPORTED_LOCATION_DEBUG "${_py_release_lib}")
+        message(STATUS "Python: forced release ABI for debug build")
+    endif()
+endif()
+
 # Shared library for Python runtime state - must be shared to avoid duplicate statics
 # when linked into both the main executable and the Python module
 add_library(lfs_python_runtime SHARED

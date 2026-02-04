@@ -171,7 +171,6 @@ if(BUILD_CUDA_PTX_ONLY)
     endif()
 
     set(LichtFeld-Studio_CUDA_ARCH "${BUILD_CUDA_MIN_SM}-virtual")
-    set(LFS_DEFER_DEVICE_SYMBOLS ON CACHE INTERNAL "Disable separable compilation for PTX-only")
 
     math(EXPR _maj "${BUILD_CUDA_MIN_SM}/10")
     math(EXPR _min "${BUILD_CUDA_MIN_SM}%10")
@@ -349,8 +348,7 @@ add_executable(${PROJECT_NAME}
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CUDA_ARCHITECTURES "${LichtFeld-Studio_CUDA_ARCH}"
-        CUDA_SEPARABLE_COMPILATION ON
-        CUDA_RESOLVE_DEVICE_SYMBOLS ON
+        CUDA_SEPARABLE_COMPILATION OFF
 )
 
 target_include_directories(${PROJECT_NAME}
