@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "core/export.hpp"
 #include "core/camera.hpp"
+#include "core/export.hpp"
 #include "core/parameters.hpp"
 #include "training/trainer.hpp"
 #include "training_state.hpp"
