@@ -48,6 +48,7 @@ namespace lfs::vis {
         bool show_crop_box = false;
         bool use_crop_box = false;
         bool desaturate_unselected = false;
+        bool desaturate_cropping = true;
         std::array<float, 3> background_color{0.0f, 0.0f, 0.0f};
         bool show_coord_axes = false;
         float axes_size = 2.0f;

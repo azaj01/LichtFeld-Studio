@@ -693,6 +693,7 @@ namespace lfs::vis {
                     proxy.show_crop_box = s.show_crop_box;
                     proxy.use_crop_box = s.use_crop_box;
                     proxy.desaturate_unselected = s.desaturate_unselected;
+                    proxy.desaturate_cropping = s.desaturate_cropping;
                     proxy.background_color = {s.background_color.r, s.background_color.g, s.background_color.b};
                     proxy.show_coord_axes = s.show_coord_axes;
                     proxy.axes_size = s.axes_size;
@@ -738,6 +739,7 @@ namespace lfs::vis {
                     s.show_crop_box = proxy.show_crop_box;
                     s.use_crop_box = proxy.use_crop_box;
                     s.desaturate_unselected = proxy.desaturate_unselected;
+                    s.desaturate_cropping = proxy.desaturate_cropping;
                     s.background_color = glm::vec3(proxy.background_color[0], proxy.background_color[1], proxy.background_color[2]);
                     s.show_coord_axes = proxy.show_coord_axes;
                     s.axes_size = proxy.axes_size;

@@ -1509,12 +1509,6 @@ class ModalEvent:
 def set_modal_event_callback(callback: Callable) -> None:
     """Set callback for modal events (input dispatch to active operator)"""
 
-def get_render_settings() -> dict:
-    """Get all render settings as dict"""
-
-def set_render_setting(key: str, value: object) -> None:
-    """Set a render setting by key"""
-
 def is_point_cloud_forced() -> bool:
     """Check if point cloud mode is forced (pre-training mode)"""
 

@@ -73,6 +73,7 @@ class RenderingPanel(Panel):
             layout.prop(settings, "selection_color_center_marker")
 
         layout.prop(settings, "desaturate_unselected")
+        layout.prop(settings, "desaturate_cropping")
 
         layout.separator()
         layout.prop(settings, "focal_length_mm")

@@ -168,6 +168,8 @@ namespace lfs::python {
         // Desaturation
         add_bool(&Proxy::desaturate_unselected, "desaturate_unselected", "Desaturate Unselected",
                  "Desaturate unselected PLYs when one is selected", false);
+        add_bool(&Proxy::desaturate_cropping, "desaturate_cropping", "Desaturate Cropping",
+                 "Dim outside crop area instead of hiding", true);
 
         // View Settings
         add_float(&Proxy::focal_length_mm, "focal_length_mm", "Focal Length", "Focal length in mm", 35.0, 10.0, 200.0);
