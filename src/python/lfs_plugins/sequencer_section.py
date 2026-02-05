@@ -64,7 +64,7 @@ def draw_sequencer_section(layout):
 
     _, state.show_camera_path = layout.checkbox("Show Camera Path", state.show_camera_path)
     if layout.is_item_hovered():
-        layout.tooltip("Display camera path in viewport")
+        layout.set_tooltip("Display camera path in viewport")
 
     speed_idx = 2
     for i, val in enumerate(SPEED_VALUES):
@@ -92,12 +92,12 @@ def draw_sequencer_section(layout):
 
     _, state.follow_playback = layout.checkbox("Follow Playback", state.follow_playback)
     if layout.is_item_hovered():
-        layout.tooltip("Camera follows playhead during playback")
+        layout.set_tooltip("Camera follows playhead during playback")
 
     layout.set_next_item_width(-1)
     _, state.pip_preview_scale = layout.slider_float("Preview Size", state.pip_preview_scale, 0.5, 2.0)
     if layout.is_item_hovered():
-        layout.tooltip("Scale the preview window")
+        layout.set_tooltip("Scale the preview window")
 
     layout.spacing()
 
@@ -193,7 +193,7 @@ def _draw_video_export_section(layout, has_keyframes: bool):
 
     _, vs.quality = layout.slider_int("Quality", vs.quality, 15, 28)
     if layout.is_item_hovered():
-        layout.tooltip("Lower = higher quality, larger file")
+        layout.set_tooltip("Lower = higher quality, larger file")
 
     layout.spacing()
 
