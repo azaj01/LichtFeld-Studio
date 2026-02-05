@@ -18,18 +18,24 @@ def validate_plugin(plugin_path: str | Path) -> list[str]:
     if not plugin_dir.exists():
         return [f"Plugin not found: {plugin_dir}"]
 
-    manifest = plugin_dir / "plugin.toml"
+    manifest = plugin_dir / "pyproject.toml"
     if not manifest.exists():
-        errors.append("Missing plugin.toml")
+        errors.append("Missing pyproject.toml")
     else:
         try:
             data = tomllib.loads(manifest.read_text())
-            if "plugin" not in data:
-                errors.append("plugin.toml: missing [plugin] section")
-            elif "name" not in data["plugin"]:
-                errors.append("plugin.toml: missing plugin.name")
+            lf = data.get("tool", {}).get("lichtfeld", {})
+            if not lf:
+                errors.append("pyproject.toml: missing [tool.lichtfeld] section")
+            project = data.get("project", {})
+            for field in ("name", "version", "description"):
+                if field not in project:
+                    errors.append(f"pyproject.toml: missing project.{field}")
+            for field in ("auto_start", "hot_reload"):
+                if field not in lf:
+                    errors.append(f"pyproject.toml: missing tool.lichtfeld.{field}")
         except Exception as e:
-            errors.append(f"plugin.toml: {e}")
+            errors.append(f"pyproject.toml: {e}")
 
     init_py = plugin_dir / "__init__.py"
     if not init_py.exists():

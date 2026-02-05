@@ -51,16 +51,17 @@ def create_plugin(plugin_dir: Path, name: str, code: str, manifest: str = None):
 
     if manifest is None:
         manifest = f"""
-[plugin]
+[project]
 name = "{name}"
 version = "1.0.0"
+description = "Test plugin {name}"
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = false
 hot_reload = true
 """
 
-    (plugin_dir / "plugin.toml").write_text(manifest)
+    (plugin_dir / "pyproject.toml").write_text(manifest)
     (plugin_dir / "__init__.py").write_text(code)
 
 
@@ -124,7 +125,7 @@ def on_load():
 
         plugin_dir = error_plugins_dir / "corrupt_manifest"
         plugin_dir.mkdir()
-        (plugin_dir / "plugin.toml").write_text("not valid toml [[[")
+        (plugin_dir / "pyproject.toml").write_text("not valid toml [[[")
         (plugin_dir / "__init__.py").write_text("def on_load(): pass")
 
         mgr = PluginManager.instance()

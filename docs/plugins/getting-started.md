@@ -8,7 +8,7 @@ LichtFeld Studio plugins extend the application with custom panels, operators, t
 
 ```
 ~/.lichtfeld/plugins/my_plugin/
-├── plugin.toml          # Plugin manifest (required)
+├── pyproject.toml       # Plugin manifest (required)
 ├── __init__.py          # Entry point with on_load/on_unload (required)
 ├── panels/
 │   ├── __init__.py
@@ -19,23 +19,21 @@ LichtFeld Studio plugins extend the application with custom panels, operators, t
     └── my_icon.png
 ```
 
-### plugin.toml manifest
+### pyproject.toml manifest
 
-Every plugin requires a `plugin.toml` at its root:
+Every plugin requires a `pyproject.toml` with `[tool.lichtfeld]` at its root:
 
 ```toml
-[plugin]
+[project]
 name = "my_plugin"
 version = "0.1.0"
 description = "What this plugin does"
-author = "Your Name"
+authors = [{name = "Your Name"}]
+dependencies = []
 
-[dependencies]
-packages = []               # Python packages to install, e.g. ["numpy>=1.20"]
-
-[lifecycle]
-auto_start = true           # Load automatically on startup
-hot_reload = true           # Reload on file changes during development
+[tool.lichtfeld]
+auto_start = true
+hot_reload = true
 ```
 
 ### Entry point
@@ -61,18 +59,15 @@ def on_unload():
 
 ### Minimal "Hello World" plugin
 
-**plugin.toml**:
+**pyproject.toml**:
 ```toml
-[plugin]
+[project]
 name = "hello_world"
 version = "0.1.0"
 description = "Hello World example"
-author = ""
+dependencies = []
 
-[dependencies]
-packages = []
-
-[lifecycle]
+[tool.lichtfeld]
 auto_start = true
 hot_reload = true
 ```
@@ -1099,7 +1094,7 @@ def on_unload():
 
 ### File watcher
 
-When `hot_reload = true` in `plugin.toml`, LichtFeld watches your plugin directory for changes. On any `.py` file save, the plugin is automatically unloaded and reloaded.
+When `hot_reload = true` in `pyproject.toml`, LichtFeld watches your plugin directory for changes. On any `.py` file save, the plugin is automatically unloaded and reloaded.
 
 ### Logging
 
@@ -1232,9 +1227,9 @@ lf.plugins.uninstall("my_plugin")  # Remove
 lf.plugins.list_loaded()           # Show loaded plugins
 ```
 
-### plugin.toml packaging requirements
+### pyproject.toml packaging requirements
 
-For publishing, ensure your `plugin.toml` includes:
+For publishing, ensure your `pyproject.toml` includes:
 - `name` - Unique plugin identifier
 - `version` - Semantic version (e.g., `"1.0.0"`)
 - `description` - Clear description of what the plugin does

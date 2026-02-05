@@ -1,12 +1,10 @@
-[plugin]
+[project]
 name = "gaussian_analyzer"
 version = "1.0.0"
 description = "Analyze and visualize gaussian splat properties"
-author = "LichtFeld Examples"
+authors = [{name = "LichtFeld Examples"}]
+dependencies = []
 
-[dependencies]
-packages = []
-
-[lifecycle]
+[tool.lichtfeld]
 auto_start = true
 hot_reload = true

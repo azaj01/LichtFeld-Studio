@@ -144,13 +144,14 @@ class TestModuleReloadLifetime:
         plugin_dir = reload_plugins_dir / "callback_plugin"
         plugin_dir.mkdir()
 
-        (plugin_dir / "plugin.toml").write_text(
+        (plugin_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "callback_plugin"
 version = "1.0.0"
+description = ""
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = false
 hot_reload = true
 """
@@ -208,13 +209,14 @@ def on_unload():
         plugin_dir = reload_plugins_dir / "stale_ref"
         plugin_dir.mkdir()
 
-        (plugin_dir / "plugin.toml").write_text(
+        (plugin_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "stale_ref"
 version = "1.0.0"
+description = ""
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = false
 hot_reload = true
 """

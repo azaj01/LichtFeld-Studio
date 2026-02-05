@@ -21,7 +21,7 @@ class PluginState(Enum):
 
 @dataclass
 class PluginInfo:
-    """Plugin metadata parsed from plugin.toml."""
+    """Plugin metadata parsed from pyproject.toml."""
 
     name: str
     version: str

@@ -244,11 +244,12 @@ class TestPluginLifecycle:
 class TestFullPluginStructure:
     """The full_plugin example must have correct directory structure."""
 
-    def test_has_plugin_toml(self):
-        toml = DOCS_EXAMPLES / "full_plugin" / "plugin.toml"
+    def test_has_pyproject_toml(self):
+        toml = DOCS_EXAMPLES / "full_plugin" / "pyproject.toml"
         assert toml.exists()
         content = toml.read_text()
-        assert "[plugin]" in content
+        assert "[project]" in content
+        assert "[tool.lichtfeld]" in content
         assert "name" in content
         assert "version" in content
 

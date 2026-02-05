@@ -22,13 +22,14 @@ def create_plugin_files(plugin_dir: Path, name: str, delay: float = 0.0):
     """Create a minimal plugin with optional artificial delay in on_load."""
     plugin_dir.mkdir(exist_ok=True)
 
-    (plugin_dir / "plugin.toml").write_text(
+    (plugin_dir / "pyproject.toml").write_text(
         f"""
-[plugin]
+[project]
 name = "{name}"
 version = "1.0.0"
+description = ""
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = false
 hot_reload = true
 """

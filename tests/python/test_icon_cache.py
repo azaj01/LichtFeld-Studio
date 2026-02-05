@@ -107,14 +107,16 @@ class TestPluginIconCleanup:
         plugin_dir = plugin_icons_dir / "icon_plugin"
         plugin_dir.mkdir()
 
-        (plugin_dir / "plugin.toml").write_text(
+        (plugin_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "icon_plugin"
 version = "1.0.0"
+description = ""
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = false
+hot_reload = true
 """
         )
 

@@ -75,7 +75,7 @@ class PluginInstaller:
         if not stamp.exists():
             return False
         stamp_mtime = stamp.stat().st_mtime
-        for name in ("plugin.toml", "uv.lock"):
+        for name in ("pyproject.toml", "uv.lock"):
             src = self.plugin.info.path / name
             if src.exists() and src.stat().st_mtime > stamp_mtime:
                 return False
@@ -84,11 +84,9 @@ class PluginInstaller:
     def install_dependencies(
         self, on_progress: Optional[Callable[[str], None]] = None
     ) -> bool:
-        """Install all dependencies declared in plugin.toml."""
-        deps = list(self.plugin.info.dependencies)
+        """Install plugin dependencies via uv sync."""
         plugin_path = self.plugin.info.path
-        use_sync = (plugin_path / "uv.lock").exists()
-        if not deps and not use_sync:
+        if not (plugin_path / "pyproject.toml").exists():
             return True
 
         if self._deps_already_installed():
@@ -100,33 +98,17 @@ class PluginInstaller:
 
         venv_python = self._get_venv_python()
 
-        if use_sync:
-            cmd = [
-                str(uv),
-                "sync",
-                "--project",
-                str(plugin_path),
-                "--python",
-                str(venv_python),
-            ]
-            action = "Syncing dependencies with uv..."
-            error_label = "uv sync"
-        else:
-            cmd = [
-                str(uv),
-                "pip",
-                "install",
-                "--project",
-                str(plugin_path),
-                "--python",
-                str(venv_python),
-                *deps,
-            ]
-            action = f"Installing {len(deps)} dependencies with uv..."
-            error_label = "uv pip install"
+        cmd = [
+            str(uv),
+            "sync",
+            "--project",
+            str(plugin_path),
+            "--python",
+            str(venv_python),
+        ]
 
         if on_progress:
-            on_progress(action)
+            on_progress("Syncing dependencies with uv...")
 
         output_lines = []
         with subprocess.Popen(
@@ -146,7 +128,7 @@ class PluginInstaller:
 
         if proc.returncode != 0:
             tail = "\n".join(output_lines[-10:])
-            raise PluginDependencyError(f"{error_label} failed:\n{tail}")
+            raise PluginDependencyError(f"uv sync failed:\n{tail}")
 
         self._deps_stamp_path().touch()
         return True
@@ -301,14 +283,18 @@ def clone_from_url(
         raise PluginError(f"Failed to clone repository: {result.stderr}")
 
     # Verify it's a valid plugin
-    manifest_path = temp_dir / "plugin.toml"
+    manifest_path = temp_dir / "pyproject.toml"
     if not manifest_path.exists():
         shutil.rmtree(temp_dir, ignore_errors=True)
-        raise PluginError(f"Repository is not a valid plugin (missing plugin.toml)")
+        raise PluginError(f"Repository is not a valid plugin (missing pyproject.toml)")
 
     with open(manifest_path, "rb") as f:
         data = tomllib.load(f)
-    manifest_name = str(data.get("plugin", {}).get("name", "")).strip()
+    lf_section = data.get("tool", {}).get("lichtfeld", {})
+    if not lf_section:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        raise PluginError("Repository is not a valid plugin (missing [tool.lichtfeld])")
+    manifest_name = str(data.get("project", {}).get("name", "")).strip()
     final_name = manifest_name or plugin_name
     target_dir = plugins_dir / final_name
 

@@ -7,34 +7,60 @@ A Python-based plugin system for LichtFeld Studio with per-plugin virtual enviro
 ```
 ~/.lichtfeld/
 ├── plugins/                          # Plugin directory
-│   ├── colmap/                       # Example: COLMAP plugin
-│   │   ├── plugin.toml               # Manifest (dependencies, metadata)
+│   ├── simple_plugin/
+│   │   ├── pyproject.toml            # Manifest (required — discovery trigger)
 │   │   ├── .venv/                    # Isolated virtual environment
-│   │   ├── __init__.py               # Entry point (on_load, on_unload)
-│   │   └── ...
-│   └── another_plugin/
-│       └── ...
+│   │   └── __init__.py               # Entry point (on_load, on_unload)
+│   └── pytorch_plugin/
+│       ├── pyproject.toml            # Manifest (required)
+│       ├── .venv/                    # Isolated virtual environment
+│       └── __init__.py
 └── venv/                             # Global venv (existing)
 ```
 
-## Plugin Manifest (plugin.toml)
+## Plugin Manifest (pyproject.toml)
+
+Every plugin **must** have a `pyproject.toml` with a `[tool.lichtfeld]` section — its existence is how LichtFeld discovers plugins.
 
 ```toml
-[plugin]
+[project]
 name = "my_plugin"
 version = "1.0.0"
 description = "Plugin description"
-author = "Author Name"
-min_lichtfeld_version = "1.0.0"
-
-[dependencies]
-packages = [
+authors = [{name = "Author Name"}]
+dependencies = [
     "some-package>=1.0.0",
 ]
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = true
 hot_reload = true
+min_lichtfeld_version = "1.0.0"
+```
+
+## Dependencies
+
+All dependencies are declared in `[project].dependencies` and resolved via `uv sync`. The installer runs `uv sync --project <plugin_dir>` which creates the plugin's `.venv` and installs everything.
+
+For plugins that need packages from custom indexes (e.g., PyTorch CUDA wheels), add `[tool.uv.index]` and `[tool.uv.sources]` sections to the same `pyproject.toml`:
+
+```toml
+[project]
+name = "my-pytorch-plugin"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["torch>=2.6.0"]
+
+[tool.lichtfeld]
+auto_start = true
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu124" }]
 ```
 
 ## Core Components
@@ -127,7 +153,7 @@ lf.plugins.stop_watcher()
 
 ```
 ~/.lichtfeld/plugins/my_plugin/
-├── plugin.toml
+├── pyproject.toml
 └── __init__.py
 ```
 
@@ -190,7 +216,7 @@ The COLMAP plugin (`~/.lichtfeld/plugins/colmap/`) provides Structure-from-Motio
 
 | File | Purpose |
 |------|---------|
-| `plugin.toml` | Manifest with pycolmap dependency |
+| `pyproject.toml` | Manifest with pycolmap dependency |
 | `utils.py` | ColmapConfig, ReconstructionResult dataclasses |
 | `features.py` | SIFT feature extraction |
 | `matching.py` | Feature matching (exhaustive/sequential/vocab_tree/spatial) |

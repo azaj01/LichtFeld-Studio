@@ -104,7 +104,7 @@ class PluginManager:
 
         plugins = []
         for entry in self._plugins_dir.iterdir():
-            if entry.is_dir() and (entry / "plugin.toml").exists():
+            if entry.is_dir() and (entry / "pyproject.toml").exists():
                 try:
                     plugins.append(self._parse_manifest(entry))
                 except Exception as e:
@@ -112,25 +112,38 @@ class PluginManager:
         return plugins
 
     def _parse_manifest(self, plugin_dir: Path) -> PluginInfo:
-        """Parse plugin.toml manifest."""
-        with open(plugin_dir / "plugin.toml", "rb") as f:
+        """Parse pyproject.toml manifest."""
+        with open(plugin_dir / "pyproject.toml", "rb") as f:
             data = tomllib.load(f)
 
-        plugin = data.get("plugin", {})
-        deps = data.get("dependencies", {})
-        lifecycle = data.get("lifecycle", {})
+        project = data.get("project", {})
+        lf = data.get("tool", {}).get("lichtfeld", {})
+
+        if "tool" not in data or "lichtfeld" not in data["tool"]:
+            raise ValueError("Missing [tool.lichtfeld] section")
+
+        for field in ("name", "version", "description"):
+            if field not in project:
+                raise ValueError(f"Missing project.{field}")
+
+        for field in ("auto_start", "hot_reload"):
+            if field not in lf:
+                raise ValueError(f"Missing tool.lichtfeld.{field}")
+
+        authors = project.get("authors", [])
+        author = authors[0].get("name", "") if authors else lf.get("author", "")
 
         return PluginInfo(
-            name=plugin.get("name", plugin_dir.name),
-            version=plugin.get("version", "0.0.0"),
+            name=project["name"],
+            version=project["version"],
             path=plugin_dir,
-            description=plugin.get("description", ""),
-            author=plugin.get("author", ""),
-            entry_point=plugin.get("entry_point", "__init__"),
-            dependencies=deps.get("packages", []),
-            auto_start=lifecycle.get("auto_start", True),
-            hot_reload=lifecycle.get("hot_reload", True),
-            min_lichtfeld_version=plugin.get("min_lichtfeld_version", ""),
+            description=project["description"],
+            author=author,
+            entry_point=lf.get("entry_point", "__init__"),
+            dependencies=project.get("dependencies", []),
+            auto_start=lf["auto_start"],
+            hot_reload=lf["hot_reload"],
+            min_lichtfeld_version=lf.get("min_lichtfeld_version", ""),
         )
 
     def load(self, name: str, on_progress: Optional[Callable] = None) -> bool:

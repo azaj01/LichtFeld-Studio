@@ -39,17 +39,15 @@ def sample_plugin(temp_plugins_dir):
     plugin_dir = temp_plugins_dir / "sample_plugin"
     plugin_dir.mkdir()
 
-    (plugin_dir / "plugin.toml").write_text(
+    (plugin_dir / "pyproject.toml").write_text(
         """
-[plugin]
+[project]
 name = "sample_plugin"
 version = "1.0.0"
 description = "A sample plugin"
+dependencies = []
 
-[dependencies]
-packages = []
-
-[lifecycle]
+[tool.lichtfeld]
 auto_start = true
 hot_reload = true
 """
@@ -96,10 +94,10 @@ class TestPluginDiscovery:
         assert plugins[0].description == "A sample plugin"
 
     def test_discover_ignores_invalid(self, temp_plugins_dir):
-        """Should skip directories without plugin.toml."""
+        """Should skip directories without pyproject.toml."""
         from lfs_plugins import PluginManager
 
-        # Create directory without plugin.toml
+        # Create directory without pyproject.toml
         invalid_dir = temp_plugins_dir / "not_a_plugin"
         invalid_dir.mkdir()
         (invalid_dir / "__init__.py").write_text("# not a plugin")
@@ -194,17 +192,22 @@ def on_unload():
 class TestPluginInfo:
     """Tests for PluginInfo parsing."""
 
-    def test_parse_manifest_defaults(self, temp_plugins_dir):
-        """Should use defaults for missing fields."""
+    def test_parse_minimal_manifest(self, temp_plugins_dir):
+        """Should parse a manifest with all required fields and no extras."""
         from lfs_plugins import PluginManager
 
         plugin_dir = temp_plugins_dir / "minimal_plugin"
         plugin_dir.mkdir()
-        (plugin_dir / "plugin.toml").write_text(
+        (plugin_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "minimal"
 version = "0.1.0"
+description = "Minimal plugin"
+
+[tool.lichtfeld]
+auto_start = false
+hot_reload = false
 """
         )
         (plugin_dir / "__init__.py").write_text("def on_load(): pass")
@@ -214,8 +217,9 @@ version = "0.1.0"
 
         assert len(plugins) == 1
         assert plugins[0].name == "minimal"
-        assert plugins[0].auto_start is True
-        assert plugins[0].hot_reload is True
+        assert plugins[0].description == "Minimal plugin"
+        assert plugins[0].auto_start is False
+        assert plugins[0].hot_reload is False
         assert plugins[0].dependencies == []
 
 
@@ -237,11 +241,16 @@ class TestPluginState:
         # Create a plugin that will fail to load
         plugin_dir = temp_plugins_dir / "broken_plugin"
         plugin_dir.mkdir()
-        (plugin_dir / "plugin.toml").write_text(
+        (plugin_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "broken_plugin"
 version = "1.0.0"
+description = "Plugin that fails to load"
+
+[tool.lichtfeld]
+auto_start = true
+hot_reload = false
 """
         )
         (plugin_dir / "__init__.py").write_text("raise RuntimeError('intentional')")
@@ -278,14 +287,16 @@ class TestPluginLifecycle:
         for name in ["plugin_a", "plugin_b"]:
             plugin_dir = temp_plugins_dir / name
             plugin_dir.mkdir()
-            (plugin_dir / "plugin.toml").write_text(
+            (plugin_dir / "pyproject.toml").write_text(
                 f"""
-[plugin]
+[project]
 name = "{name}"
 version = "1.0.0"
+description = "Auto-start plugin {name}"
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = true
+hot_reload = false
 """
             )
             (plugin_dir / "__init__.py").write_text("def on_load(): pass")
@@ -311,11 +322,16 @@ class TestVersionEnforcement:
 
         plugin_dir = temp_plugins_dir / "compatible_plugin"
         plugin_dir.mkdir()
-        (plugin_dir / "plugin.toml").write_text(
+        (plugin_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "compatible_plugin"
 version = "1.0.0"
+description = "Plugin with compatible version"
+
+[tool.lichtfeld]
+auto_start = true
+hot_reload = false
 min_lichtfeld_version = "0.5.0"
 """
         )
@@ -334,11 +350,16 @@ min_lichtfeld_version = "0.5.0"
 
         plugin_dir = temp_plugins_dir / "future_plugin"
         plugin_dir.mkdir()
-        (plugin_dir / "plugin.toml").write_text(
+        (plugin_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "future_plugin"
 version = "1.0.0"
+description = "Plugin requiring future version"
+
+[tool.lichtfeld]
+auto_start = true
+hot_reload = false
 min_lichtfeld_version = "99.0.0"
 """
         )
@@ -373,11 +394,16 @@ class TestModuleNamespacing:
 
         plugin_dir = temp_plugins_dir / "json"
         plugin_dir.mkdir()
-        (plugin_dir / "plugin.toml").write_text(
+        (plugin_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "json"
 version = "1.0.0"
+description = "Plugin named json for collision test"
+
+[tool.lichtfeld]
+auto_start = true
+hot_reload = false
 """
         )
         (plugin_dir / "__init__.py").write_text("PLUGIN_LOADED = True\ndef on_load(): pass")
@@ -471,3 +497,110 @@ class TestGitHubUrlParsing:
 
         with pytest.raises(PluginError, match="Not a GitHub URL"):
             parse_github_url("https://gitlab.com/owner/repo")
+
+
+class TestInstallerSyncDetection:
+    """Tests for uv sync vs uv pip install detection."""
+
+    @pytest.fixture
+    def installer_plugin(self, tmp_path):
+        """Create a plugin directory with installer for testing."""
+        scripts_dir = Path(__file__).parent.parent.parent / "scripts"
+        if str(scripts_dir) not in sys.path:
+            sys.path.insert(0, str(scripts_dir))
+
+        plugin_dir = tmp_path / "test_plugin"
+        plugin_dir.mkdir()
+        (plugin_dir / "pyproject.toml").write_text(
+            """
+[project]
+name = "test_plugin"
+version = "1.0.0"
+description = "Plugin for installer tests"
+dependencies = ["requests>=2.0"]
+
+[tool.lichtfeld]
+auto_start = true
+hot_reload = false
+"""
+        )
+        venv_dir = plugin_dir / ".venv"
+        venv_dir.mkdir()
+        (venv_dir / "bin").mkdir(parents=True)
+        (venv_dir / "bin" / "python").touch()
+        return plugin_dir
+
+    def _make_installer(self, plugin_dir):
+        from lfs_plugins.plugin import PluginInfo, PluginInstance
+        from lfs_plugins.installer import PluginInstaller
+
+        info = PluginInfo(
+            name="test_plugin",
+            version="1.0.0",
+            description="",
+            author="",
+            path=plugin_dir,
+            dependencies=["requests>=2.0"],
+            auto_start=True,
+            hot_reload=True,
+        )
+        instance = PluginInstance(info=info)
+        instance.venv_path = plugin_dir / ".venv"
+        return PluginInstaller(instance)
+
+    @staticmethod
+    def _mock_popen():
+        from unittest.mock import MagicMock
+        import io
+
+        mock_proc = MagicMock()
+        mock_proc.stdout = io.StringIO("")
+        mock_proc.returncode = 0
+        mock_proc.__enter__ = MagicMock(return_value=mock_proc)
+        mock_proc.__exit__ = MagicMock(return_value=False)
+        return mock_proc
+
+    def test_pyproject_triggers_sync(self, installer_plugin):
+        """pyproject.toml present should use uv sync."""
+        from unittest.mock import patch
+
+        (installer_plugin / "pyproject.toml").write_text(
+            """
+[project]
+name = "test_plugin"
+version = "0.1.0"
+description = "Plugin for sync test"
+dependencies = ["requests>=2.0"]
+
+[tool.lichtfeld]
+auto_start = true
+hot_reload = false
+"""
+        )
+        installer = self._make_installer(installer_plugin)
+        mock_uv = installer_plugin / "uv"
+        mock_uv.touch()
+        mock_proc = self._mock_popen()
+
+        with patch.object(installer, "_find_uv", return_value=mock_uv), \
+             patch("subprocess.Popen", return_value=mock_proc) as mock_popen:
+            installer.install_dependencies()
+            cmd = mock_popen.call_args[0][0]
+            assert cmd[1] == "sync"
+
+    def test_stamp_invalidation_includes_pyproject(self, installer_plugin):
+        """Stamp should be invalidated when pyproject.toml changes."""
+        import os
+
+        installer = self._make_installer(installer_plugin)
+        stamp = installer._deps_stamp_path()
+        stamp.touch()
+
+        assert installer._deps_already_installed() is True
+
+        pyproject = installer_plugin / "pyproject.toml"
+        pyproject.write_text('[project]\nname = "test"\nversion = "0.1.0"\n')
+        future = stamp.stat().st_mtime + 1.0
+        os.utime(pyproject, (future, future))
+
+        assert installer._deps_already_installed() is False

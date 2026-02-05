@@ -1308,23 +1308,22 @@ t = lf.Tensor
 
 ---
 
-## plugin.toml Schema
+## pyproject.toml Schema
 
 ```toml
-[plugin]
+[project]
 name = ""                    # string, required - Unique plugin identifier
 version = ""                 # string, required - Semantic version
 description = ""             # string, optional - Plugin description
-author = ""                  # string, optional - Author name
-entry_point = "__init__"     # string, optional - Module to load (default: __init__)
-min_lichtfeld_version = ""   # string, optional - Minimum LichtFeld version
+authors = []                 # list[{name, email}], optional - PEP 621 authors
+dependencies = []            # list[string], optional - Python packages (PEP 508)
 
-[dependencies]
-packages = []                # list[string], optional - Python packages
-
-[lifecycle]
+[tool.lichtfeld]
 auto_start = true            # bool, optional - Auto-load on startup (default: true)
 hot_reload = true            # bool, optional - Support hot reload (default: true)
+entry_point = "__init__"     # string, optional - Module to load (default: __init__)
+min_lichtfeld_version = ""   # string, optional - Minimum LichtFeld version
+author = ""                  # string, optional - Author fallback (if no [project].authors)
 ```
 
 ---

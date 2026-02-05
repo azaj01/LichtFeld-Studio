@@ -38,7 +38,7 @@ This creates the following structure:
 
 ```
 ~/.lichtfeld/plugins/my_plugin/
-├── plugin.toml              # Plugin manifest
+├── pyproject.toml           # Plugin manifest
 ├── __init__.py              # Entry point (on_load/on_unload hooks)
 └── panels/
     ├── __init__.py
@@ -47,25 +47,23 @@ This creates the following structure:
 
 ### 2. Plugin Manifest
 
-Edit `plugin.toml` to configure your plugin:
+Edit `pyproject.toml` to configure your plugin:
 
 ```toml
-[plugin]
+[project]
 name = "my_plugin"
 version = "1.0.0"
 description = "My awesome plugin"
-author = "Your Name"
-min_lichtfeld_version = "1.0.0"
-
-[dependencies]
-packages = [
+authors = [{name = "Your Name"}]
+dependencies = [
     "numpy>=1.20.0",
     "pillow>=9.0.0",
 ]
 
-[lifecycle]
-auto_start = true       # Load automatically on app startup
-hot_reload = true       # Watch files and reload on changes
+[tool.lichtfeld]
+auto_start = true
+hot_reload = true
+min_lichtfeld_version = "1.0.0"
 ```
 
 ### 3. Entry Point
@@ -167,11 +165,11 @@ lf.plugins.unload("my_plugin")
 
 ## Adding Dependencies
 
-Plugins have isolated virtual environments. Dependencies specified in `plugin.toml` are installed automatically using `uv`.
+Plugins have isolated virtual environments. Dependencies are specified in `pyproject.toml` under `[project].dependencies` and installed via `uv sync`.
 
 ```toml
-[dependencies]
-packages = [
+[project]
+dependencies = [
     "numpy>=1.20.0",
     "scipy>=1.7.0",
     "torch>=2.0.0",
@@ -305,7 +303,7 @@ Users install by extracting to their `~/.lichtfeld/plugins/` directory.
 Minimum required files:
 ```
 my_plugin/
-├── plugin.toml      # Required: manifest
+├── pyproject.toml   # Required: manifest
 └── __init__.py      # Required: entry point with on_load/on_unload
 ```
 

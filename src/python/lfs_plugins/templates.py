@@ -8,16 +8,12 @@ from typing import Optional
 
 _log = logging.getLogger(__name__)
 
-PLUGIN_TOML = '''[plugin]
+PYPROJECT_TOML = '''[project]
 name = "{name}"
 version = "0.1.0"
 description = "A new LichtFeld plugin"
-author = ""
 
-[dependencies]
-packages = []
-
-[lifecycle]
+[tool.lichtfeld]
 auto_start = true
 hot_reload = true
 '''
@@ -92,7 +88,7 @@ def create_plugin(name: str, target_dir: Optional[Path] = None) -> Path:
     plugin_dir.mkdir(parents=True, exist_ok=True)
     (plugin_dir / "panels").mkdir(exist_ok=True)
 
-    (plugin_dir / "plugin.toml").write_text(PLUGIN_TOML.format(name=name))
+    (plugin_dir / "pyproject.toml").write_text(PYPROJECT_TOML.format(name=name))
     (plugin_dir / "__init__.py").write_text(INIT_PY.format(name=name))
     (plugin_dir / "panels" / "__init__.py").write_text("")
     (plugin_dir / "panels" / "main_panel.py").write_text(

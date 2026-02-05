@@ -67,7 +67,7 @@ namespace lfs::vis {
             bool pip_init_failed_ = false;
             std::optional<size_t> pip_last_keyframe_;
             bool pip_needs_update_ = true;
-            std::chrono::steady_clock::time_point pip_last_render_time_;
+            std::chrono::steady_clock::time_point pip_last_render_time_ = std::chrono::steady_clock::now();
         };
 
     } // namespace gui

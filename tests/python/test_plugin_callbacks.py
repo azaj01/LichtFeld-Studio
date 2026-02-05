@@ -52,13 +52,14 @@ def create_simple_plugin(plugin_dir: Path, name: str, extra_code: str = ""):
     """Create a simple plugin."""
     plugin_dir.mkdir(exist_ok=True)
 
-    (plugin_dir / "plugin.toml").write_text(
+    (plugin_dir / "pyproject.toml").write_text(
         f"""
-[plugin]
+[project]
 name = "{name}"
 version = "1.0.0"
+description = ""
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = false
 hot_reload = true
 """
@@ -192,14 +193,16 @@ class TestPluginCallbacks:
         # Plugin A loads plugin B in on_load
         plugin_a_dir = callback_plugins_dir / "dep_a"
         plugin_a_dir.mkdir()
-        (plugin_a_dir / "plugin.toml").write_text(
+        (plugin_a_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "dep_a"
 version = "1.0.0"
+description = ""
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = false
+hot_reload = true
 """
         )
         (plugin_a_dir / "__init__.py").write_text(
@@ -219,14 +222,16 @@ def on_unload():
         # Plugin B loads plugin A in on_load
         plugin_b_dir = callback_plugins_dir / "dep_b"
         plugin_b_dir.mkdir()
-        (plugin_b_dir / "plugin.toml").write_text(
+        (plugin_b_dir / "pyproject.toml").write_text(
             """
-[plugin]
+[project]
 name = "dep_b"
 version = "1.0.0"
+description = ""
 
-[lifecycle]
+[tool.lichtfeld]
 auto_start = false
+hot_reload = true
 """
         )
         (plugin_b_dir / "__init__.py").write_text(
