@@ -5,6 +5,7 @@
 #pragma once
 
 #include "python/python_runtime.hpp"
+#include "visualizer/operator/poll_dependency.hpp"
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/optional.h>
@@ -72,6 +73,8 @@ namespace lfs::python {
         bool enabled = true;
         bool active = true;
         bool alert = false;
+        float scale_x = 1.0f;
+        float scale_y = 1.0f;
     };
 
     struct LayoutContext {
@@ -106,6 +109,10 @@ namespace lfs::python {
         void set_active(bool v) { own_state_.active = v; }
         bool get_alert() const { return own_state_.alert; }
         void set_alert(bool v) { own_state_.alert = v; }
+        float get_scale_x() const { return own_state_.scale_x; }
+        void set_scale_x(float v) { own_state_.scale_x = v; }
+        float get_scale_y() const { return own_state_.scale_y; }
+        void set_scale_y(float v) { own_state_.scale_y = v; }
 
         PySubLayout row();
         PySubLayout column();
@@ -139,6 +146,52 @@ namespace lfs::python {
         void text_colored(const std::string& text, std::tuple<float, float, float, float> color);
         void text_wrapped(const std::string& text);
 
+        bool begin_table(const std::string& id, int columns);
+        std::tuple<bool, float> input_float(const std::string& label, float value, float step = 0.0f,
+                                            float step_fast = 0.0f, const std::string& format = "%.3f");
+        std::tuple<bool, int> input_int(const std::string& label, int value, int step = 1, int step_fast = 100);
+        std::tuple<bool, int> input_int_formatted(const std::string& label, int value, int step = 0, int step_fast = 0);
+        std::tuple<bool, int> radio_button(const std::string& label, int current, int value);
+        bool small_button(const std::string& label);
+        bool selectable(const std::string& label, bool selected = false, float height = 0.0f);
+        std::tuple<bool, std::tuple<float, float, float>> color_edit3(const std::string& label,
+                                                                      std::tuple<float, float, float> color);
+        void text_disabled(const std::string& text);
+        std::tuple<bool, int> listbox(const std::string& label, int current_idx,
+                                      const std::vector<std::string>& items, int height_items = -1);
+        void image(uint64_t texture_id, std::tuple<float, float> size,
+                   std::tuple<float, float, float, float> tint = {1, 1, 1, 1});
+        bool image_button(const std::string& id, uint64_t texture_id, std::tuple<float, float> size,
+                          std::tuple<float, float, float, float> tint = {1, 1, 1, 1});
+        std::tuple<bool, std::string> input_text_with_hint(const std::string& label, const std::string& hint,
+                                                           const std::string& value);
+        std::tuple<bool, std::string> input_text_enter(const std::string& label, const std::string& value);
+
+        void table_setup_column(const std::string& label, float width = 0.0f) const;
+        void table_next_row() const;
+        void table_next_column() const;
+        void table_headers_row() const;
+        void end_table() const;
+
+        void push_item_width(float width) const;
+        void pop_item_width() const;
+        void set_tooltip(const std::string& text) const;
+        bool is_item_hovered() const;
+        bool is_item_clicked(int button = 0) const;
+        void begin_disabled(bool disabled = true) const;
+        void end_disabled() const;
+        void same_line(float offset = 0.0f, float spacing = -1.0f) const;
+        void push_id(const std::string& id) const;
+        void pop_id() const;
+        bool begin_child(const std::string& id, std::tuple<float, float> size, bool border = false) const;
+        void end_child() const;
+        bool begin_context_menu(const std::string& id = "") const;
+        void end_context_menu() const;
+        bool menu_item(const std::string& label, bool enabled = true) const;
+        bool begin_menu(const std::string& label) const;
+        void end_menu() const;
+        std::tuple<float, float> get_content_region_avail() const;
+
         bool prop_enum(nb::object data, const std::string& prop_id,
                        const std::string& value, const std::string& text = "");
 
@@ -159,6 +212,7 @@ namespace lfs::python {
         bool entered_ = false;
         int color_push_count_ = 0;
         bool disabled_pushed_ = false;
+        bool font_scale_pushed_ = false;
     };
 
     // PanelSpace enum is defined in py_panel_registry.hpp
@@ -582,23 +636,7 @@ namespace lfs::python {
         HIDE_HEADER = 1 << 1,
     };
 
-    // Panel poll dependencies (mirrors operator PollDependency)
-    // Must be declared before PyPanelInfo which uses it
-    enum class PanelPollDependency : uint8_t {
-        NONE = 0,
-        SELECTION = 1 << 0,
-        TRAINING = 1 << 1,
-        SCENE = 1 << 2,
-        ALL = SELECTION | TRAINING | SCENE
-    };
-
-    inline PanelPollDependency operator|(PanelPollDependency a, PanelPollDependency b) {
-        return static_cast<PanelPollDependency>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
-    }
-
-    inline PanelPollDependency operator&(PanelPollDependency a, PanelPollDependency b) {
-        return static_cast<PanelPollDependency>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
-    }
+    using PollDependency = lfs::vis::op::PollDependency;
 
     // Panel info stored in registry
     struct PyPanelInfo {
@@ -610,10 +648,8 @@ namespace lfs::python {
         int order = 100;
         bool enabled = true;
 
-        std::string category;  // Tab name for grouping panels
-        std::string parent_id; // Parent panel ID for nesting
-        uint32_t options = 0;  // Bitmask of PanelOption values
-        PanelPollDependency poll_deps = PanelPollDependency::ALL;
+        uint32_t options = 0; // Bitmask of PanelOption values
+        PollDependency poll_deps = PollDependency::ALL;
 
         // Error recovery tracking
         int consecutive_errors = 0;
@@ -630,7 +666,7 @@ namespace lfs::python {
         uint64_t scene_generation;
         bool has_selection;
         bool is_training;
-        PanelPollDependency deps;
+        PollDependency deps;
     };
 
     // Singleton registry for Python panels
@@ -662,7 +698,7 @@ namespace lfs::python {
         bool set_panel_order(const std::string& idname, int new_order);
         bool set_panel_space(const std::string& idname, PanelSpace new_space);
 
-        void invalidate_poll_cache();
+        void invalidate_poll_cache(PollDependency changed = PollDependency::ALL);
 
     private:
         PyPanelRegistry() = default;
@@ -670,7 +706,7 @@ namespace lfs::python {
         PyPanelRegistry(const PyPanelRegistry&) = delete;
         PyPanelRegistry& operator=(const PyPanelRegistry&) = delete;
 
-        bool check_poll_cached(const std::string& idname, nb::object panel_class, PanelPollDependency deps);
+        bool check_poll_cached(const std::string& idname, nb::object panel_class, PollDependency deps);
 
         mutable std::mutex mutex_;
         std::vector<PyPanelInfo> panels_;
@@ -796,6 +832,8 @@ namespace lfs::python {
     public:
         static PyMenuRegistry& instance();
 
+        void register_menu(nb::object menu_class);
+        void unregister_menu(nb::object menu_class);
         void unregister_all();
 
         void draw_menu_items(MenuLocation location);
@@ -805,7 +843,7 @@ namespace lfs::python {
         std::vector<PyMenuClassInfo*> get_menu_bar_entries();
         void draw_menu_bar_entry(const std::string& idname);
 
-        void sync_from_python();
+        void sync_from_python() const;
 
     private:
         PyMenuRegistry() = default;
@@ -813,11 +851,11 @@ namespace lfs::python {
         PyMenuRegistry(const PyMenuRegistry&) = delete;
         PyMenuRegistry& operator=(const PyMenuRegistry&) = delete;
 
-        void ensure_synced();
+        void ensure_synced() const;
 
         mutable std::mutex mutex_;
-        std::vector<PyMenuClassInfo> menu_classes_;
-        bool synced_from_python_ = false;
+        mutable std::vector<PyMenuClassInfo> menu_classes_;
+        mutable bool synced_from_python_ = false;
     };
 
     class PyOperatorProperties {
