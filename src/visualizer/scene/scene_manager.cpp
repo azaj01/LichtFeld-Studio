@@ -99,8 +99,6 @@ namespace lfs::vis {
                     cmd::SetPLYVisibility{.name = shown, .visible = true}.emit();
                     LOG_DEBUG("Cycled to: {}", shown);
                 }
-
-                emitSceneChanged();
             }
         });
 
@@ -212,6 +210,8 @@ namespace lfs::vis {
         try {
             LOG_INFO("Loading splat file: {}", lfs::core::path_to_utf8(path));
 
+            core::Scene::Transaction txn(scene_);
+
             // Clear existing scene
             clear();
 
@@ -303,7 +303,6 @@ namespace lfs::vis {
                 }
             }
 
-            emitSceneChanged();
             updateCropBoxToFitScene(true);
             selectNode(name);
 
@@ -429,7 +428,6 @@ namespace lfs::vis {
                 .node_type = 0}
                 .emit();
 
-            emitSceneChanged();
             selectNode(name);
 
             // Check for companion PPISP file
@@ -510,7 +508,6 @@ namespace lfs::vis {
         }
 
         state::PLYRemoved{.name = name, .children_kept = keep_children, .parent_of_removed = parent_name}.emit();
-        emitSceneChanged();
     }
 
     void SceneManager::setPLYVisibility(const std::string& name, const bool visible) {
@@ -519,8 +516,6 @@ namespace lfs::vis {
 
         if (visible)
             syncCropToolRenderSettings(node);
-
-        emitSceneChanged();
     }
 
     // ========== Node Selection ==========
@@ -899,15 +894,14 @@ namespace lfs::vis {
             selected_nodes_.insert(cropbox->name);
         }
 
+        scene_.notifyMutation(core::Scene::MutationType::SELECTION_CHANGED);
         LOG_DEBUG("Auto-selected cropbox '{}'", cropbox->name);
-        emitSceneChanged();
     }
 
     // ========== Node Transforms ==========
 
     void SceneManager::setNodeTransform(const std::string& name, const glm::mat4& transform) {
         scene_.setNodeTransform(name, transform);
-        emitSceneChanged();
     }
 
     glm::mat4 SceneManager::getNodeTransform(const std::string& name) const {
@@ -937,7 +931,6 @@ namespace lfs::vis {
         transform[3][2] = translation.z;
 
         scene_.setNodeTransform(node_name, transform);
-        emitSceneChanged();
     }
 
     glm::vec3 SceneManager::getSelectedNodeTranslation() const {
@@ -999,7 +992,6 @@ namespace lfs::vis {
         LOG_DEBUG("setSelectedNodeTransform '{}': pos=[{:.2f}, {:.2f}, {:.2f}]",
                   node_name, transform[3][0], transform[3][1], transform[3][2]);
         scene_.setNodeTransform(node_name, transform);
-        emitSceneChanged();
     }
 
     glm::mat4 SceneManager::getSelectedNodeTransform() const {
@@ -1267,8 +1259,8 @@ namespace lfs::vis {
             selected_nodes_.insert(ellipsoid->name);
         }
 
+        scene_.notifyMutation(core::Scene::MutationType::SELECTION_CHANGED);
         LOG_DEBUG("Auto-selected ellipsoid '{}'", ellipsoid->name);
-        emitSceneChanged();
     }
 
     core::NodeId SceneManager::getSelectedNodeEllipsoidId() const {
@@ -1318,6 +1310,8 @@ namespace lfs::vis {
         LOG_TIMER("SceneManager::applyLoadedDataset");
 
         try {
+            core::Scene::Transaction txn(scene_);
+
             if (services().trainerOrNull()) {
                 services().trainerOrNull()->clearTrainer();
             }
@@ -1361,8 +1355,6 @@ namespace lfs::vis {
 
             python::set_application_scene(&scene_);
 
-            emitSceneChanged();
-
             if ((num_gaussians > 0 || num_points > 0) && services().trainerOrNull() && services().trainerOrNull()->getTrainer()) {
                 ui::PointCloudModeChanged{.enabled = true, .voxel_size = DEFAULT_VOXEL_SIZE}.emit();
             }
@@ -1404,6 +1396,8 @@ namespace lfs::vis {
             }
 
             // Validation passed - now clear and load
+            core::Scene::Transaction txn(scene_);
+
             if (services().trainerOrNull()) {
                 services().trainerOrNull()->clearTrainer();
             }
@@ -1472,8 +1466,6 @@ namespace lfs::vis {
                 .num_points = num_gaussians > 0 ? num_gaussians : num_points}
                 .emit();
 
-            emitSceneChanged();
-
             // Switch to point cloud rendering mode by default for datasets
             if ((num_gaussians > 0 || num_points > 0) && services().trainerOrNull() && services().trainerOrNull()->getTrainer()) {
                 ui::PointCloudModeChanged{.enabled = true, .voxel_size = DEFAULT_VOXEL_SIZE}.emit();
@@ -1515,9 +1507,12 @@ namespace lfs::vis {
                 return;
             }
 
-            const core::NodeId group_id = scene_.addCameraGroup("Imported Cameras", core::NULL_NODE, cameras.size());
-            for (const auto& cam : cameras) {
-                scene_.addCamera(cam->image_name(), group_id, cam);
+            {
+                core::Scene::Transaction txn(scene_);
+                const core::NodeId group_id = scene_.addCameraGroup("Imported Cameras", core::NULL_NODE, cameras.size());
+                for (const auto& cam : cameras) {
+                    scene_.addCamera(cam->image_name(), group_id, cam);
+                }
             }
 
             scene_.setSceneCenter(std::move(scene_center));
@@ -1530,8 +1525,6 @@ namespace lfs::vis {
                 .emit();
 
             python::set_application_scene(&scene_);
-
-            emitSceneChanged();
 
             LOG_INFO("Imported {} cameras from COLMAP (no images required)", cameras.size());
 
@@ -1585,6 +1578,8 @@ namespace lfs::vis {
             }
 
             // === Phase 2: Clear scene (validation passed) ===
+            core::Scene::Transaction txn(scene_);
+
             if (services().trainerOrNull()) {
                 services().trainerOrNull()->clearTrainer();
             }
@@ -1664,8 +1659,6 @@ namespace lfs::vis {
 
             python::set_application_scene(&scene_);
 
-            emitSceneChanged();
-
             ui::PointCloudModeChanged{.enabled = false, .voxel_size = DEFAULT_VOXEL_SIZE}.emit();
             selectNode(MODEL_NAME);
             ui::FocusTrainingPanel{}.emit();
@@ -1707,7 +1700,6 @@ namespace lfs::vis {
         }
 
         state::SceneCleared{}.emit();
-        emitSceneChanged();
 
         LOG_INFO("Scene cleared");
     }
@@ -1724,6 +1716,8 @@ namespace lfs::vis {
             LOG_WARN("switchToEditMode: no training model");
             return;
         }
+
+        core::Scene::Transaction txn(scene_);
 
         auto splat_data = std::move(model_node->model);
         const size_t num_gaussians = splat_data->size();
@@ -1762,7 +1756,6 @@ namespace lfs::vis {
             .type = state::SceneLoaded::Type::PLY,
             .num_gaussians = num_gaussians}
             .emit();
-        emitSceneChanged();
 
         LOG_INFO("Switched to Edit Mode: {} gaussians", num_gaussians);
     }
@@ -1891,10 +1884,6 @@ namespace lfs::vis {
         return info;
     }
 
-    void SceneManager::emitSceneChanged() {
-        state::SceneChanged{}.emit();
-    }
-
     void SceneManager::syncCropToolRenderSettings(const core::SceneNode* node) {
         if (!node)
             return;
@@ -2015,7 +2004,7 @@ namespace lfs::vis {
 
         if (splat_node_names.empty()) {
             if (!pointcloud_node_names.empty()) {
-                emitSceneChanged();
+                scene_.notifyMutation(core::Scene::MutationType::MODEL_CHANGED);
                 if (services().renderingOrNull()) {
                     services().renderingOrNull()->markDirty();
                 }
@@ -2081,8 +2070,7 @@ namespace lfs::vis {
             }
         }
 
-        scene_.invalidateCache();
-        emitSceneChanged();
+        scene_.notifyMutation(core::Scene::MutationType::MODEL_CHANGED);
     }
 
     void SceneManager::handleCropByEllipsoid(const glm::mat4& world_transform, const glm::vec3& radii, const bool inverse) {
@@ -2170,7 +2158,7 @@ namespace lfs::vis {
 
         if (splat_node_names.empty()) {
             if (!pointcloud_node_names.empty()) {
-                emitSceneChanged();
+                scene_.notifyMutation(core::Scene::MutationType::MODEL_CHANGED);
                 if (services().renderingOrNull()) {
                     services().renderingOrNull()->markDirty();
                 }
@@ -2207,8 +2195,7 @@ namespace lfs::vis {
             }
         }
 
-        scene_.invalidateCache();
-        emitSceneChanged();
+        scene_.notifyMutation(core::Scene::MutationType::MODEL_CHANGED);
     }
 
     void SceneManager::updatePlyPath(const std::string& ply_name, const std::filesystem::path& ply_path) {
@@ -2248,8 +2235,6 @@ namespace lfs::vis {
                 }
             }
 
-            emitSceneChanged();
-
             LOG_INFO("Successfully renamed '{}' to '{}'", old_name, new_name);
         } else if (!success) {
             LOG_WARN("Failed to rename '{}' to '{}' - name may already exist", old_name, new_name);
@@ -2283,7 +2268,6 @@ namespace lfs::vis {
 
         scene_.reparent(node->id, parent_id);
         state::NodeReparented{.name = node_name, .old_parent = old_parent_name, .new_parent = new_parent_name}.emit();
-        emitSceneChanged();
     }
 
     void SceneManager::handleAddGroup(const std::string& name, const std::string& parent_name) {
@@ -2354,7 +2338,6 @@ namespace lfs::vis {
             };
 
         emit_added(new_name, parent_name);
-        emitSceneChanged();
     }
 
     void SceneManager::handleMergeGroup(const std::string& name) {
@@ -2431,7 +2414,6 @@ namespace lfs::vis {
             }
         }
 
-        emitSceneChanged();
         LOG_INFO("Merged group '{}' -> '{}'", name, merged_name);
     }
 
@@ -2581,7 +2563,6 @@ namespace lfs::vis {
         node->cropbox->inverse = false;
         node->local_transform = glm::mat4(1.0f);
         node->transform_dirty = true;
-        scene_.invalidateCache();
 
         if (auto* rm = services().renderingOrNull()) {
             auto settings = rm->getSettings();
@@ -2590,6 +2571,7 @@ namespace lfs::vis {
             rm->markDirty();
         }
 
+        scene_.notifyMutation(core::Scene::MutationType::MODEL_CHANGED);
         LOG_INFO("Reset cropbox '{}'", cropbox_node->name);
     }
 
@@ -2616,7 +2598,6 @@ namespace lfs::vis {
         node->ellipsoid->inverse = false;
         node->local_transform = glm::mat4(1.0f);
         node->transform_dirty = true;
-        scene_.invalidateCache();
 
         if (auto* rm = services().renderingOrNull()) {
             auto settings = rm->getSettings();
@@ -2625,6 +2606,7 @@ namespace lfs::vis {
             rm->markDirty();
         }
 
+        scene_.notifyMutation(core::Scene::MutationType::MODEL_CHANGED);
         LOG_INFO("Reset ellipsoid '{}'", ellipsoid_node->name);
     }
 
@@ -2942,11 +2924,6 @@ namespace lfs::vis {
             }
         }
 
-        scene_.invalidateCache();
-        emitSceneChanged();
-        if (services().renderingOrNull())
-            services().renderingOrNull()->markDirty();
-
         LOG_INFO("Pasted {} Gaussians as '{}'", count, name);
         return {name};
     }
@@ -2988,10 +2965,7 @@ namespace lfs::vis {
             lfs::core::mirror_gaussians(model, *mask, axis, center);
         }
 
-        scene_.invalidateCache();
-        if (auto* rendering = services().renderingOrNull()) {
-            rendering->markDirty();
-        }
+        scene_.notifyMutation(core::Scene::MutationType::MODEL_CHANGED);
 
         static constexpr const char* AXIS_NAMES[] = {"X", "Y", "Z"};
         LOG_INFO("Mirrored {} gaussians ({} nodes) along {} axis", total_count, nodes.size(),
@@ -3006,6 +2980,7 @@ namespace lfs::vis {
         }
 
         pasted_names.reserve(clipboard_.size());
+        core::Scene::Transaction txn(scene_);
 
         for (const auto& entry : clipboard_) {
             if (!entry.data || entry.data->size() == 0)
@@ -3072,13 +3047,6 @@ namespace lfs::vis {
             if (content_type_ == ContentType::Empty && !pasted_names.empty()) {
                 content_type_ = ContentType::SplatFiles;
             }
-        }
-
-        scene_.invalidateCache();
-        emitSceneChanged();
-
-        if (services().renderingOrNull()) {
-            services().renderingOrNull()->markDirty();
         }
 
         LOG_DEBUG("Pasted {} nodes", pasted_names.size());
