@@ -12,6 +12,7 @@
 #include "gui/windows/file_browser.hpp"
 #include "internal/viewport.hpp"
 #include "python/python_runtime.hpp"
+#include "rendering/rendering_manager.hpp"
 #include "visualizer_impl.hpp"
 #include "windows/disk_space_error_dialog.hpp"
 #include "windows/video_extractor_dialog.hpp"
@@ -153,7 +154,9 @@ namespace lfs::vis::gui::native_panels {
 
         const auto& vp = ctx.ui->viewer->getViewport();
         const auto view = vp.getViewMatrix();
-        const auto proj = vp.getProjectionMatrix();
+        auto* rm = ctx.ui->viewer->getRenderingManager();
+        const float focal_mm = rm ? rm->getFocalLengthMm() : lfs::rendering::DEFAULT_FOCAL_LENGTH_MM;
+        const auto proj = vp.getProjectionMatrix(focal_mm);
         const float vp_pos[] = {ctx.viewport->pos.x, ctx.viewport->pos.y};
         const float vp_size[] = {ctx.viewport->size.x, ctx.viewport->size.y};
         const float cam_pos[] = {vp.camera.t.x, vp.camera.t.y, vp.camera.t.z};
@@ -161,7 +164,7 @@ namespace lfs::vis::gui::native_panels {
 
         python::invoke_viewport_overlay(glm::value_ptr(view), glm::value_ptr(proj),
                                         vp_pos, vp_size, cam_pos, cam_fwd,
-                                        ImGui::GetForegroundDrawList());
+                                        ImGui::GetBackgroundDrawList());
     }
 
 } // namespace lfs::vis::gui::native_panels

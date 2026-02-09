@@ -43,6 +43,7 @@ namespace lfs::python {
             float r, g, b, a;
             float thickness;
             float radius;
+            float font_size;
             std::string text;
         };
 
@@ -53,23 +54,23 @@ namespace lfs::python {
         [[nodiscard]] std::tuple<float, float> viewport_size() const;
 
         void draw_line_2d(std::tuple<float, float> start, std::tuple<float, float> end,
-                          std::tuple<float, float, float, float> color, float thickness = 1.0f);
+                          nb::object color, float thickness = 1.0f);
         void draw_circle_2d(std::tuple<float, float> center, float radius,
-                            std::tuple<float, float, float, float> color, float thickness = 1.0f);
+                            nb::object color, float thickness = 1.0f);
         void draw_rect_2d(std::tuple<float, float> min, std::tuple<float, float> max,
-                          std::tuple<float, float, float, float> color, float thickness = 1.0f);
+                          nb::object color, float thickness = 1.0f);
         void draw_filled_rect_2d(std::tuple<float, float> min, std::tuple<float, float> max,
-                                 std::tuple<float, float, float, float> color);
+                                 nb::object color);
         void draw_filled_circle_2d(std::tuple<float, float> center, float radius,
-                                   std::tuple<float, float, float, float> color);
+                                   nb::object color);
         void draw_text_2d(std::tuple<float, float> pos, const std::string& text,
-                          std::tuple<float, float, float, float> color);
+                          nb::object color, float font_size = 0.0f);
         void draw_line_3d(std::tuple<float, float, float> start, std::tuple<float, float, float> end,
-                          std::tuple<float, float, float, float> color, float thickness = 1.0f);
+                          nb::object color, float thickness = 1.0f);
         void draw_point_3d(std::tuple<float, float, float> pos,
-                           std::tuple<float, float, float, float> color, float size = 4.0f);
+                           nb::object color, float size = 4.0f);
         void draw_text_3d(std::tuple<float, float, float> pos, const std::string& text,
-                          std::tuple<float, float, float, float> color);
+                          nb::object color, float font_size = 0.0f);
 
         void set_camera_state(const glm::mat4& view, const glm::mat4& proj,
                               const glm::vec2& viewport_pos, const glm::vec2& viewport_size,

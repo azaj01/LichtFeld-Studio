@@ -942,9 +942,10 @@ namespace lfs::vis {
         const bool needs_render = rendering_manager_->needsRender();
         const bool continuous_input = input_controller_ && input_controller_->isContinuousInputActive();
         const bool has_python_animation = python::has_frame_callback();
+        const bool has_python_overlay = python::has_viewport_draw_handlers();
         const bool needs_gui_animation = gui_manager_ && gui_manager_->needsAnimationFrame();
 
-        if (needs_render || continuous_input || has_python_animation || needs_gui_animation) {
+        if (needs_render || continuous_input || has_python_animation || has_python_overlay || needs_gui_animation) {
             window_manager_->pollEvents();
         } else if (is_training) {
             // Training: longer wait to reduce GPU load and memory fragmentation

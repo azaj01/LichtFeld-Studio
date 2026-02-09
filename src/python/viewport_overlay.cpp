@@ -51,6 +51,11 @@ namespace lfs::python {
             registry.invoke_handlers(DrawHandlerTiming::PostUI, draw_ctx);
 
             auto* dl = static_cast<ImDrawList*>(draw_list_ptr);
+            const float ox = vp_p.x;
+            const float oy = vp_p.y;
+
+            dl->PushClipRect({ox, oy}, {ox + vp_s.x, oy + vp_s.y}, true);
+
             for (const auto& cmd : draw_ctx.get_draw_commands()) {
                 const auto to_u8 = [](float v) -> int {
                     return static_cast<int>(std::clamp(v * 255.0f + 0.5f, 0.0f, 255.0f));
@@ -74,7 +79,10 @@ namespace lfs::python {
                     dl->AddCircleFilled({cmd.x1, cmd.y1}, cmd.radius, color);
                     break;
                 case PyViewportDrawContext::DrawCommand::TEXT_2D:
-                    dl->AddText({cmd.x1, cmd.y1}, color, cmd.text.c_str());
+                    if (cmd.font_size > 0.0f)
+                        dl->AddText(ImGui::GetFont(), cmd.font_size, {cmd.x1, cmd.y1}, color, cmd.text.c_str());
+                    else
+                        dl->AddText({cmd.x1, cmd.y1}, color, cmd.text.c_str());
                     break;
                 case PyViewportDrawContext::DrawCommand::LINE_3D: {
                     auto s = draw_ctx.world_to_screen({cmd.x1, cmd.y1, cmd.z1});
@@ -98,7 +106,10 @@ namespace lfs::python {
                     auto p = draw_ctx.world_to_screen({cmd.x1, cmd.y1, cmd.z1});
                     if (p) {
                         auto [px, py] = *p;
-                        dl->AddText({px, py}, color, cmd.text.c_str());
+                        if (cmd.font_size > 0.0f)
+                            dl->AddText(ImGui::GetFont(), cmd.font_size, {px, py}, color, cmd.text.c_str());
+                        else
+                            dl->AddText({px, py}, color, cmd.text.c_str());
                     }
                     break;
                 }
@@ -107,6 +118,8 @@ namespace lfs::python {
                     break;
                 }
             }
+
+            dl->PopClipRect();
         }
 
     } // namespace
