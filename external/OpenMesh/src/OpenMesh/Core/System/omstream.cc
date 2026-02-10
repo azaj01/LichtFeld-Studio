@@ -39,64 +39,50 @@
  *                                                                           *
  * ========================================================================= */
 
-
-
 //=============================================================================
 //
 //  CLASS mostream - IMPLEMENTATION
 //
 //=============================================================================
 
-
 //== INCLUDES =================================================================
 
 #include <OpenMesh/Core/System/omstream.hh>
 #include <iostream>
 
+//== IMPLEMENTATION ==========================================================
 
-//== IMPLEMENTATION ========================================================== 
-
-
-OpenMesh::mostream& omlog() 
-{
-  static bool initialized = false;
-  static OpenMesh::mostream mystream;
-  if (!initialized)
-  {
-    mystream.connect(std::clog);
+OpenMesh::mostream& omlog() {
+    static bool initialized = false;
+    static OpenMesh::mostream mystream;
+    if (!initialized) {
+        mystream.connect(std::clog);
 #ifdef NDEBUG
-    mystream.disable();
+        mystream.disable();
 #endif
-    initialized = true;
-  }
-  return mystream;
+        initialized = true;
+    }
+    return mystream;
 }
 
-
-OpenMesh::mostream& omout() 
-{
-  static bool initialized = false;
-  static OpenMesh::mostream mystream;
-  if (!initialized)
-  {
-    mystream.connect(std::cout);
-    initialized = true;
-  }
-  return mystream;
+OpenMesh::mostream& omout() {
+    static bool initialized = false;
+    static OpenMesh::mostream mystream;
+    if (!initialized) {
+        mystream.connect(std::cout);
+        initialized = true;
+    }
+    return mystream;
 }
 
-
-OpenMesh::mostream& omerr() 
-{
-  static bool initialized = false;
-  static OpenMesh::mostream mystream;
-  if (!initialized)
-  {
-    mystream.connect(std::cerr);
-    initialized = true;
-  }
-  return mystream;
+OpenMesh::mostream& omerr() {
+    static bool initialized = false;
+    static OpenMesh::mostream mystream;
+    if (!initialized) {
+        mystream.connect(std::cerr);
+        initialized = true;
+    }
+    return mystream;
 }
-
 
 //=============================================================================

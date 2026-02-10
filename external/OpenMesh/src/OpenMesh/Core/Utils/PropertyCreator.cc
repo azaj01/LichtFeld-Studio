@@ -41,25 +41,21 @@
 
 #include "PropertyCreator.hh"
 
-#include <OpenMesh/Core/IO/importer/BaseImporter.hh>
-#include <OpenMesh/Core/Mesh/Handles.hh>
 #include <OpenMesh/Core/Geometry/VectorT.hh>
 #include <OpenMesh/Core/IO/SR_types.hh>
-
+#include <OpenMesh/Core/IO/importer/BaseImporter.hh>
+#include <OpenMesh/Core/Mesh/Handles.hh>
 
 namespace OpenMesh {
 
-PropertyCreationManager& PropertyCreationManager::instance()
-{
-  static PropertyCreationManager manager;
-  return manager;
-}
+    PropertyCreationManager& PropertyCreationManager::instance() {
+        static PropertyCreationManager manager;
+        return manager;
+    }
 
-bool PropertyCreator::can_you_create(const std::string& _type_name)
-{
-  return _type_name == type_string();
-}
-
+    bool PropertyCreator::can_you_create(const std::string& _type_name) {
+        return _type_name == type_string();
+    }
 
 } /* namespace OpenMesh */
 
@@ -74,11 +70,11 @@ OM_REGISTER_PROPERTY_TYPE(float)
 OM_REGISTER_PROPERTY_TYPE(double)
 OM_REGISTER_PROPERTY_TYPE(long double)
 OM_REGISTER_PROPERTY_TYPE(char)
-OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::int8_t  )
-OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::int16_t )
-OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::int32_t )
-//OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::int64_t )
-OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::uint8_t )
+OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::int8_t)
+OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::int16_t)
+OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::int32_t)
+// OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::int64_t )
+OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::uint8_t)
 OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::uint16_t)
 OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::uint32_t)
 OM_REGISTER_PROPERTY_TYPE(OpenMesh::IO::uint64_t)
@@ -89,10 +85,10 @@ OM_REGISTER_PROPERTY_TYPE(std::vector<float>)
 OM_REGISTER_PROPERTY_TYPE(std::vector<double>)
 OM_REGISTER_PROPERTY_TYPE(std::vector<long double>)
 OM_REGISTER_PROPERTY_TYPE(std::vector<char>)
-OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::int8_t  >)
-OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::int16_t >)
-OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::int32_t >)
-OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::uint8_t >)
+OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::int8_t>)
+OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::int16_t>)
+OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::int32_t>)
+OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::uint8_t>)
 OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::uint16_t>)
 OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::uint32_t>)
 OM_REGISTER_PROPERTY_TYPE(std::vector<OpenMesh::IO::uint64_t>)

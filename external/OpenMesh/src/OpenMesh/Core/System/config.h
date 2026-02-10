@@ -51,48 +51,47 @@
 
 //=============================================================================
 
-#include <assert.h>
-#include <OpenMesh/Core/System/compiler.hh>
 #include <OpenMesh/Core/System/OpenMeshDLLMacros.hh>
+#include <OpenMesh/Core/System/compiler.hh>
+#include <assert.h>
 
 // ----------------------------------------------------------------------------
 
-
 #define OM_VERSION 0x0B0000
-//#define OM_VERSION 0x70200
+// #define OM_VERSION 0x70200
 
 #define OM_GET_VER ((OM_VERSION & 0xf0000) >> 16)
 #define OM_GET_MAJ ((OM_VERSION & 0x0ff00) >> 8)
-#define OM_GET_MIN  (OM_VERSION & 0x000ff)
+#define OM_GET_MIN (OM_VERSION & 0x000ff)
 
 #ifdef WIN32
-#  ifdef min
-#    pragma message("Detected min macro! OpenMesh does not compile with min/max macros active! Please add a define NOMINMAX to your compiler flags or add #undef min before including OpenMesh headers !")
-#    error min macro active 
-#  endif
-#  ifdef max
-#    pragma message("Detected max macro! OpenMesh does not compile with min/max macros active! Please add a define NOMINMAX to your compiler flags or add #undef max before including OpenMesh headers !")
-#    error max macro active 
-#  endif
+#ifdef min
+#pragma message("Detected min macro! OpenMesh does not compile with min/max macros active! Please add a define NOMINMAX to your compiler flags or add #undef min before including OpenMesh headers !")
+#error min macro active
+#endif
+#ifdef max
+#pragma message("Detected max macro! OpenMesh does not compile with min/max macros active! Please add a define NOMINMAX to your compiler flags or add #undef max before including OpenMesh headers !")
+#error max macro active
+#endif
 #endif
 
 //! define OM_SUPPRESS_DEPRECATED to suppress deprecated code warnings
 #if defined(OM_SUPPRESS_DEPRECATED)
 #pragma message( \
     "OpenMesh deprecated code warnings suppressed, please fix your code soon")
-#  define OM_DEPRECATED(msg)
+#define OM_DEPRECATED(msg)
 #elif defined(_MSC_VER)
-#  define OM_DEPRECATED(msg) __declspec(deprecated(msg))
+#define OM_DEPRECATED(msg) __declspec(deprecated(msg))
 #elif defined(__GNUC__)
-#  if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40500 /* Test for GCC >= 4.5.0 */
-#    define OM_DEPRECATED(msg) __attribute__ ((deprecated(msg)))
-#  else
-#    define OM_DEPRECATED(msg) __attribute__ ((deprecated))
-#  endif
-#elif defined(__clang__)
-#  define OM_DEPRECATED(msg) __attribute__ ((deprecated(msg)))
+#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40500 /* Test for GCC >= 4.5.0 */
+#define OM_DEPRECATED(msg) __attribute__((deprecated(msg)))
 #else
-#  define OM_DEPRECATED(msg)
+#define OM_DEPRECATED(msg) __attribute__((deprecated))
+#endif
+#elif defined(__clang__)
+#define OM_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#else
+#define OM_DEPRECATED(msg)
 #endif
 
 typedef unsigned int uint;

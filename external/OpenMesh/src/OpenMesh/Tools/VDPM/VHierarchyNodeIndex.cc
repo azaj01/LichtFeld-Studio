@@ -39,35 +39,27 @@
  *                                                                           *
  * ========================================================================= */
 
-
-
 //=============================================================================
 //
 //  CLASS newClass - IMPLEMENTATION
 //
 //=============================================================================
 
-
 //== INCLUDES =================================================================
 
 #include <OpenMesh/Tools/VDPM/VHierarchyNodeIndex.hh>
 
-
 //== NAMESPACES ===============================================================
 
 namespace OpenMesh {
-namespace VDPM {
+    namespace VDPM {
 
+        //== IMPLEMENTATION ==========================================================
 
-//== IMPLEMENTATION ========================================================== 
+        const VHierarchyNodeIndex
+            VHierarchyNodeIndex::InvalidIndex = VHierarchyNodeIndex();
 
-
-const VHierarchyNodeIndex 
-VHierarchyNodeIndex::InvalidIndex = VHierarchyNodeIndex();
-
-
-//=============================================================================
-} // namespace VDPM
+        //=============================================================================
+    } // namespace VDPM
 } // namespace OpenMesh
 //=============================================================================
-

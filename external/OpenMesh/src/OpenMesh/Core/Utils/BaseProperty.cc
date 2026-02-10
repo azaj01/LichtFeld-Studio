@@ -39,16 +39,12 @@
  *                                                                           *
  * ========================================================================= */
 
-
-
 #include <OpenMesh/Core/Utils/BaseProperty.hh>
 
-namespace OpenMesh
-{
+namespace OpenMesh {
 
-void BaseProperty::stats(std::ostream& _ostr) const
-{
-  _ostr << "  " << name() << (persistent() ? ", persistent " : "") << "\n";
-}
+    void BaseProperty::stats(std::ostream& _ostr) const {
+        _ostr << "  " << name() << (persistent() ? ", persistent " : "") << "\n";
+    }
 
-}
+} // namespace OpenMesh

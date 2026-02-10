@@ -39,7 +39,6 @@
  *                                                                           *
  * ========================================================================= */
 
-
 /** \file Observer.cc
  */
 
@@ -56,37 +55,29 @@
 //== NAMESPACE ===============================================================
 
 namespace OpenMesh {
-namespace Decimater {
+    namespace Decimater {
 
-//== IMPLEMENTATION ==========================================================
+        //== IMPLEMENTATION ==========================================================
 
-Observer::Observer(size_t _notificationInterval) :
-        notificationInterval_(_notificationInterval)
-{
-}
+        Observer::Observer(size_t _notificationInterval) : notificationInterval_(_notificationInterval) {
+        }
 
-Observer::~Observer()
-{
-}
+        Observer::~Observer() {
+        }
 
-size_t Observer::get_interval() const
-{
-  return Observer::notificationInterval_;
-}
+        size_t Observer::get_interval() const {
+            return Observer::notificationInterval_;
+        }
 
-void Observer::set_interval(size_t _notificationInterval)
-{
-  notificationInterval_ = _notificationInterval;
-}
+        void Observer::set_interval(size_t _notificationInterval) {
+            notificationInterval_ = _notificationInterval;
+        }
 
-bool Observer::abort() const
-{
-  return false;
-};
+        bool Observer::abort() const {
+            return false;
+        };
 
-
+        //=============================================================================
+    } // namespace Decimater
+} // namespace OpenMesh
 //=============================================================================
-} // END_NS_DECIMATER
-} // END_NS_OPENMESH
-//=============================================================================
-

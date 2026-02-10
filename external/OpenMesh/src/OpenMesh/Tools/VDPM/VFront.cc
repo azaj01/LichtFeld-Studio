@@ -39,14 +39,11 @@
  *                                                                           *
  * ========================================================================= */
 
-
-
 //=============================================================================
 //
 //  CLASS newClass - IMPLEMENTATION
 //
 //=============================================================================
-
 
 //== INCLUDES =================================================================
 
@@ -55,60 +52,51 @@
 //== NAMESPACES ===============================================================
 
 namespace OpenMesh {
-namespace VDPM {
+    namespace VDPM {
 
-//== IMPLEMENTATION ========================================================== 
+        //== IMPLEMENTATION ==========================================================
 
+        VFront::VFront() {
+        }
 
-VFront::VFront()
-{  
-}
+        void
+        VFront::
+            add(VHierarchyNodeHandle _node_handle) {
+            front_location_[_node_handle.idx()] = front_.insert(front_.end(), _node_handle);
+        }
 
+        void
+        VFront::
+            remove(VHierarchyNodeHandle _node_handle) {
+            VHierarchyNodeHandleListIter node_it = front_location_[_node_handle.idx()];
+            const bool isFront = (front_it_ == node_it);
+            VHierarchyNodeHandleListIter next_it = front_.erase(node_it);
+            front_location_[_node_handle.idx()] = front_.end();
 
-void
-VFront::
-add(VHierarchyNodeHandle _node_handle)
-{
-  front_location_[_node_handle.idx()] = front_.insert(front_.end(), _node_handle);
-}
+            if (isFront)
+                front_it_ = next_it;
+        }
 
+        bool
+        VFront::
+            is_active(VHierarchyNodeHandle _node_handle) {
+            return (front_location_[_node_handle.idx()] != front_.end()) ? true : false;
+        }
 
-void
-VFront::
-remove(VHierarchyNodeHandle _node_handle)
-{
-  VHierarchyNodeHandleListIter node_it = front_location_[_node_handle.idx()];
-  const bool isFront = (front_it_ == node_it);
-  VHierarchyNodeHandleListIter next_it = front_.erase(node_it);
-  front_location_[_node_handle.idx()] = front_.end();
+        void
+        VFront::
+            init(VHierarchyNodeHandleContainer& _roots, unsigned int _n_details) {
+            unsigned int i;
 
-  if (isFront)
-    front_it_ = next_it;
-}
+            front_location_.resize(_roots.size() + 2 * _n_details);
+            for (i = 0; i < front_location_.size(); ++i)
+                front_location_[i] = front_.end();
 
-bool
-VFront::
-is_active(VHierarchyNodeHandle _node_handle)
-{
-  return  (front_location_[_node_handle.idx()] != front_.end()) ? true : false;
-}
+            for (i = 0; i < _roots.size(); ++i)
+                add(_roots[i]);
+        }
 
-void 
-VFront::
-init(VHierarchyNodeHandleContainer &_roots, unsigned int _n_details)
-{
-  unsigned int i;
-
-  front_location_.resize(_roots.size() + 2*_n_details);
-  for (i=0; i<front_location_.size(); ++i)
-    front_location_[i] = front_.end();
-
-  for (i=0; i<_roots.size(); ++i)
-    add(_roots[i]);
-}
-
-
-//=============================================================================
-} // namespace VDPM
+        //=============================================================================
+    } // namespace VDPM
 } // namespace OpenMesh
 //=============================================================================
